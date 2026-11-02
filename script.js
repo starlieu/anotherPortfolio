@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.nav-links a').forEach(link => {
       link.addEventListener('click', () => navLinks.classList.remove('active'));
-    });
+n    });
   }
 
   // Sticky Navbar background on scroll
@@ -61,6 +61,22 @@ document.addEventListener('DOMContentLoaded', () => {
     let reconnectDelay = 1000;
     let closedByPage = false;
 
+    // Custom Rich Presence apps (including music players) are exposed as
+    // ordinary Discord activities; unlike Spotify they do not populate data.spotify.
+    const getActivityText = activities => {
+      if (!Array.isArray(activities)) return '';
+
+      const activity = activities.find(item =>
+        item && item.type !== 4 && (item.name || item.details || item.state)
+      );
+      if (!activity) return '';
+
+      const parts = [activity.name, activity.details, activity.state]
+        .filter(Boolean)
+        .filter((part, index, all) => all.indexOf(part) === index);
+      return parts.join(' — ');
+    };
+
     const renderPresence = data => {
       if (!data) return;
       const user = data.discord_user;
@@ -77,16 +93,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      const activities = Array.isArray(data.activities) ? data.activities : [];
-      const spotify = data.spotify || null;
-      const gameActivity = activities.find(item => item.type === 0) || null;
+      const statusText = statusLabels[status] || statusLabels.offline;
+      const spotify = data.spotify;
+      const activityText = getActivityText(data.activities);
       if (detail) {
-        const statusText = statusLabels[status] || statusLabels.offline;
         if (spotify && spotify.song && spotify.artist) {
           detail.textContent = `${statusText} · Écoute ${spotify.song} — ${spotify.artist}`;
-        } else if (gameActivity) {
-          const activityText = [gameActivity.name, gameActivity.details, gameActivity.state].filter(Boolean).join(' — ');
-          detail.textContent = activityText ? `${statusText} · ${activityText}` : statusText;
+        } else if (activityText) {
+          detail.textContent = `${statusText} · ${activityText}`;
         } else {
           detail.textContent = statusText;
         }
