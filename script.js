@@ -41,7 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
     revealElements.forEach(el => el.classList.add('active'));
   }
 
-  // Discord presence via Lanyard. Join discord.gg/lanyard to enable the API.
+  // Discord Rich Presence via Lanyard WebSocket.
+  // The account must be in the Lanyard Discord server for its data to be available.
   const presenceCard = document.getElementById('discord-presence');
   if (presenceCard) {
     const userId = '1242039694540279838';
@@ -54,40 +55,110 @@ document.addEventListener('DOMContentLoaded', () => {
     const detail = document.getElementById('discord-detail');
     const name = document.getElementById('discord-name');
     const avatar = document.getElementById('discord-avatar');
+    let socket;
+    let heartbeat;
+    let reconnectTimer;
+    let reconnectDelay = 1000;
+    let closedByPage = false;
 
     const renderPresence = data => {
+      if (!data) return;
       const user = data.discord_user;
       const status = data.discord_status || 'offline';
       presenceCard.dataset.status = status;
+
       if (user && name) name.textContent = user.global_name || user.display_name || user.username || 'starlie';
-      if (user && avatar && user.avatar) {
-        const extension = user.avatar.startsWith('a_') ? 'gif' : 'png';
-        avatar.src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${extension}?size=128`;
+      if (user && avatar) {
+        if (user.avatar) {
+          const extension = user.avatar.startsWith('a_') ? 'gif' : 'png';
+          avatar.src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${extension}?size=128`;
+        } else {
+          avatar.src = `https://cdn.discordapp.com/embed/avatars/${Number(user.discriminator || 0) % 5}.png`;
+        }
       }
 
-      const activity = (data.activities || []).find(item => item.type === 0) || null;
+      const activities = Array.isArray(data.activities) ? data.activities : [];
+      const activity = activities.find(item => item.type === 0) || null;
       if (detail) {
+        const statusText = statusLabels[status] || statusLabels.offline;
         if (activity) {
           const activityText = [activity.name, activity.details, activity.state].filter(Boolean).join(' — ');
-          detail.textContent = `${statusLabels[status] || statusLabels.offline} · ${activityText}`;
+          detail.textContent = activityText ? `${statusText} · ${activityText}` : statusText;
+        } else if (data.listening_to_spotify) {
+          detail.textContent = `${statusText} · Écoute Spotify`;
         } else {
-          detail.textContent = statusLabels[status] || statusLabels.offline;
+          detail.textContent = statusText;
         }
       }
     };
 
-    fetch(`https://api.lanyard.rest/v1/users/${userId}`)
-      .then(response => {
-        if (!response.ok) throw new Error('Lanyard request failed');
-        return response.json();
-      })
-      .then(result => {
-        if (result.success && result.data) renderPresence(result.data);
-        else throw new Error('Lanyard user unavailable');
-      })
-      .catch(() => {
-        if (detail) detail.textContent = 'Indisponible — rejoins le serveur Lanyard';
+    const connect = () => {
+      if (closedByPage) return;
+      if (detail && !socket) detail.textContent = 'Connexion au statut Discord…';
+
+      try {
+        socket = new WebSocket('wss://api.lanyard.rest/socket');
+      } catch (error) {
+        scheduleReconnect();
+        return;
+      }
+
+      socket.addEventListener('open', () => {
+        reconnectDelay = 1000;
       });
+
+      socket.addEventListener('message', event => {
+        let message;
+        try {
+          message = JSON.parse(event.data);
+        } catch (error) {
+          return;
+        }
+
+        if (message.op === 1 && message.d && message.d.heartbeat_interval) {
+          clearInterval(heartbeat);
+          heartbeat = setInterval(() => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+              socket.send(JSON.stringify({ op: 3 }));
+            }
+          }, message.d.heartbeat_interval);
+          socket.send(JSON.stringify({ op: 2, d: { subscribe_to_id: userId } }));
+        } else if (message.op === 0 && message.t === 'INIT_STATE') {
+          renderPresence(message.d);
+        } else if (message.op === 0 && message.t === 'PRESENCE_UPDATE') {
+          renderPresence(message.d);
+        }
+      });
+
+      socket.addEventListener('close', () => {
+        clearInterval(heartbeat);
+        socket = null;
+        scheduleReconnect();
+      });
+
+      socket.addEventListener('error', () => {
+        if (detail) detail.textContent = 'Statut Discord indisponible — vérifie la connexion Lanyard';
+        if (socket) socket.close();
+      });
+    };
+
+    const scheduleReconnect = () => {
+      if (closedByPage || reconnectTimer) return;
+      if (detail) detail.textContent = 'Reconnexion au statut Discord…';
+      reconnectTimer = setTimeout(() => {
+        reconnectTimer = null;
+        reconnectDelay = Math.min(reconnectDelay * 2, 30000);
+        connect();
+      }, reconnectDelay);
+    };
+
+    connect();
+    window.addEventListener('beforeunload', () => {
+      closedByPage = true;
+      clearInterval(heartbeat);
+      clearTimeout(reconnectTimer);
+      if (socket) socket.close();
+    });
   }
 
   // Background Canvas — Subtle Particles / Stars
