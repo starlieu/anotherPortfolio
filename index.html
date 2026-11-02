@@ -8,17 +8,20 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css?v=20261019-2" />
+  <link rel="stylesheet" href="./style.css?v=20261102-rp-1" />
   <style>
-    .discord-presence { display:flex; align-items:center; gap:12px; width:min(100% - 32px, 390px); margin:18px auto 0; padding:12px 16px; border:1px solid rgba(255,255,255,.1); border-radius:16px; background:rgba(20,22,35,.72); color:inherit; text-align:left; backdrop-filter:blur(12px); }
-    .discord-presence-avatar { width:42px; height:42px; border-radius:50%; object-fit:cover; }
-    .discord-presence-copy { min-width:0; flex:1; }
-    .discord-presence-name { font-weight:700; }
-    .discord-presence-detail { overflow:hidden; margin-top:3px; color:rgba(255,255,255,.7); font-size:.85rem; text-overflow:ellipsis; white-space:nowrap; }
-    .discord-presence-indicator { width:11px; height:11px; flex:none; border:2px solid #171923; border-radius:50%; background:#747f8d; }
+    .discord-presence { display:flex; align-items:center; gap:14px; width:min(100%, 430px); margin:20px auto 0; padding:14px 16px; border:1px solid rgba(255,255,255,.12); border-radius:16px; background:linear-gradient(145deg,rgba(32,34,48,.96),rgba(18,20,31,.94)); color:var(--text-main); text-align:left; box-shadow:0 12px 36px rgba(0,0,0,.35); backdrop-filter:blur(14px); }
+    .discord-presence-avatar-wrap { position:relative; flex:none; }
+    .discord-presence-avatar { display:block; width:52px; height:52px; border-radius:50%; object-fit:cover; }
+    .discord-presence-indicator { position:absolute; right:-1px; bottom:-1px; width:15px; height:15px; border:3px solid #191b27; border-radius:50%; background:#747f8d; }
     .discord-presence[data-status="online"] .discord-presence-indicator { background:#43b581; }
     .discord-presence[data-status="idle"] .discord-presence-indicator { background:#faa61a; }
     .discord-presence[data-status="dnd"] .discord-presence-indicator { background:#f04747; }
+    .discord-presence-copy { min-width:0; flex:1; }
+    .discord-presence-label { margin-bottom:2px; color:var(--text-dim); font-size:.7rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+    .discord-presence-name { overflow:hidden; color:#fff; font-weight:700; text-overflow:ellipsis; white-space:nowrap; }
+    .discord-presence-detail { overflow:hidden; margin-top:3px; color:rgba(255,255,255,.72); font-size:.85rem; line-height:1.45; text-overflow:ellipsis; white-space:nowrap; }
+    @media (max-width:480px) { .discord-presence { width:100%; } }
   </style>
 </head>
 <body>
@@ -63,13 +66,16 @@
         <a href="https://www.tiktok.com/@.starlieu" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="TikTok de starlieu" title="TikTok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.6 6.2a5.8 5.8 0 0 1-3.5-4.7V1h-4.2v14.5a2.7 2.7 0 1 1-2.7-2.7c.5 0 1 .1 1.4.4V9a7 7 0 1 0 5.5 6.8V8.4a10 10 0 0 0 5.8 1.9V6.1c-.8.1-1.6.1-2.3.1z"/></svg><span>TikTok</span></a>
         <a href="https://youtube.com/@starlieu" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="YouTube de starlieu" title="YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.2 3.6-6.2 3.6z"/></svg><span>YouTube</span></a>
       </div>
-      <article id="discord-presence" class="discord-presence" data-status="offline" aria-live="polite" aria-label="Statut Discord">
-        <img id="discord-avatar" class="discord-presence-avatar" src="./avatar.png" alt="" />
-        <div class="discord-presence-copy">
-          <div id="discord-name" class="discord-presence-name">starlie</div>
-          <div id="discord-detail" class="discord-presence-detail">Chargement du statut Discord…</div>
+      <article id="discord-presence" class="discord-presence" data-status="offline" aria-live="polite" aria-label="Rich Presence Discord">
+        <div class="discord-presence-avatar-wrap">
+          <img id="discord-avatar" class="discord-presence-avatar" src="./avatar.jpg" alt="" />
+          <span class="discord-presence-indicator" aria-hidden="true"></span>
         </div>
-        <span class="discord-presence-indicator" aria-hidden="true"></span>
+        <div class="discord-presence-copy">
+          <div class="discord-presence-label">Discord Rich Presence</div>
+          <div id="discord-name" class="discord-presence-name">starlie</div>
+          <div id="discord-detail" class="discord-presence-detail">Chargement du statut…</div>
+        </div>
       </article>
     </div>
   </section>
