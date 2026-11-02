@@ -78,14 +78,15 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const activities = Array.isArray(data.activities) ? data.activities : [];
-      const activity = activities.find(item => item.type === 0) || null;
+      const spotify = data.spotify || null;
+      const gameActivity = activities.find(item => item.type === 0) || null;
       if (detail) {
         const statusText = statusLabels[status] || statusLabels.offline;
-        if (activity) {
-          const activityText = [activity.name, activity.details, activity.state].filter(Boolean).join(' — ');
+        if (spotify && spotify.song && spotify.artist) {
+          detail.textContent = `${statusText} · Écoute ${spotify.song} — ${spotify.artist}`;
+        } else if (gameActivity) {
+          const activityText = [gameActivity.name, gameActivity.details, gameActivity.state].filter(Boolean).join(' — ');
           detail.textContent = activityText ? `${statusText} · ${activityText}` : statusText;
-        } else if (data.listening_to_spotify) {
-          detail.textContent = `${statusText} · Écoute Spotify`;
         } else {
           detail.textContent = statusText;
         }
