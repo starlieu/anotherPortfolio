@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.nav-links a').forEach(link => {
       link.addEventListener('click', () => navLinks.classList.remove('active'));
-n    });
+    });
   }
 
   // Sticky Navbar background on scroll
@@ -61,8 +61,8 @@ n    });
     let reconnectDelay = 1000;
     let closedByPage = false;
 
-    // Custom Rich Presence apps (including music players) are exposed as
-    // ordinary Discord activities; unlike Spotify they do not populate data.spotify.
+    // Custom Rich Presence apps (including music players) are ordinary
+    // Discord activities; unlike Spotify they do not populate data.spotify.
     const getActivityText = activities => {
       if (!Array.isArray(activities)) return '';
 
@@ -71,10 +71,10 @@ n    });
       );
       if (!activity) return '';
 
-      const parts = [activity.name, activity.details, activity.state]
+      return [activity.name, activity.details, activity.state]
         .filter(Boolean)
-        .filter((part, index, all) => all.indexOf(part) === index);
-      return parts.join(' — ');
+        .filter((part, index, all) => all.indexOf(part) === index)
+        .join(' — ');
     };
 
     const renderPresence = data => {
