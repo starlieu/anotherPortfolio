@@ -10,25 +10,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css?v=20261112-colors-1" />
   <style>
-    .discord-presence { display:block; width:min(100%, 1000px); margin:28px auto 0; padding:36px 38px 30px; border:2px solid #e4d2e8; border-radius:28px; background:#f1e2f4; color:#29232d; text-align:left; box-shadow:0 10px 28px rgba(23,14,29,.12); }
+    .discord-presence { display:block; width:min(100%, 1000px); margin:28px auto 0; padding:36px 38px 30px; border:2px solid rgba(191,172,194,.45); border-radius:28px; background:linear-gradient(135deg,rgba(191,172,194,.3) 0%,rgba(80,56,104,.78) 100%); color:#f0eaf3; text-align:left; box-shadow:0 10px 28px rgba(23,14,29,.28); }
     .discord-presence[hidden] { display:none; }
-    .discord-presence-label { margin:0 0 24px; color:#302a34; font-size:1.55rem; font-weight:500; line-height:1.3; }
+    .discord-presence-label { margin:0 0 24px; color:#f0eaf3; font-size:1.55rem; font-weight:500; line-height:1.3; }
     .discord-presence-main { display:flex; align-items:center; gap:28px; min-height:140px; }
     .discord-presence-art { position:relative; display:grid; place-items:center; width:140px; height:140px; flex:none; }
     .discord-presence-art[hidden] { display:none; }
     .discord-presence-image { display:block; width:140px; height:140px; border-radius:12px; object-fit:cover; background:#e5d8e8; }
     .discord-presence-image[hidden] { display:none; }
-    .discord-presence-small-image { position:absolute; right:-8px; bottom:-8px; width:52px; height:52px; border:3px solid #f1e2f4; border-radius:50%; object-fit:cover; background:#e5d8e8; }
+    .discord-presence-small-image { position:absolute; right:-8px; bottom:-8px; width:52px; height:52px; border:3px solid #503868; border-radius:50%; object-fit:cover; background:#e5d8e8; }
     .discord-presence-small-image[hidden] { display:none; }
     .discord-presence-copy { min-width:0; flex:1; }
-    .discord-presence-name { overflow:hidden; color:#211c24; font-size:1.7rem; font-weight:700; text-overflow:ellipsis; white-space:nowrap; }
-    .discord-presence-detail { overflow:hidden; margin-top:2px; color:#29232d; font-size:1.3rem; line-height:1.4; text-overflow:ellipsis; white-space:nowrap; }
+    .discord-presence-name { overflow:hidden; color:#fff; font-size:1.7rem; font-weight:700; text-overflow:ellipsis; white-space:nowrap; }
+    .discord-presence-detail { overflow:hidden; margin-top:2px; color:#f0eaf3; font-size:1.3rem; line-height:1.4; text-overflow:ellipsis; white-space:nowrap; }
     .discord-presence-detail[hidden] { display:none; }
     .discord-presence-progress { margin-top:28px; }
     .discord-presence-progress[hidden] { display:none; }
-    .discord-presence-track { height:10px; overflow:hidden; border-radius:999px; background:#e2d3e6; }
-    .discord-presence-fill { width:0; height:100%; border-radius:inherit; background:#635bff; transition:width .5s linear; }
-    .discord-presence-times { display:flex; justify-content:space-between; margin-top:10px; color:#302a34; font-size:1.15rem; font-variant-numeric:tabular-nums; }
+    .discord-presence-track { height:10px; overflow:hidden; border-radius:999px; background:rgba(255,255,255,.22); }
+    .discord-presence-fill { width:0; height:100%; border-radius:inherit; background:linear-gradient(90deg,#bfacc2,#e6d5ea); transition:width .5s linear; }
+    .discord-presence-times { display:flex; justify-content:space-between; margin-top:10px; color:#f0eaf3; font-size:1.15rem; font-variant-numeric:tabular-nums; }
     @media (max-width:600px) { .discord-presence { padding:24px 22px; border-radius:22px; } .discord-presence-label { margin-bottom:18px; font-size:1.2rem; } .discord-presence-main { gap:18px; min-height:0; } .discord-presence-art,.discord-presence-image { width:88px; height:88px; } .discord-presence-small-image { width:36px; height:36px; right:-5px; bottom:-5px; border-width:2px; } .discord-presence-name { font-size:1.2rem; } .discord-presence-detail { font-size:.98rem; } .discord-presence-progress { margin-top:22px; } .discord-presence-times { font-size:.95rem; } }
   </style>
 </head>
