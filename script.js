@@ -12,9 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const navbar = document.querySelector('.navbar');
-  if (navbar) {
-    window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 50));
-  }
+  if (navbar) window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 50));
 
   const revealElements = document.querySelectorAll('.reveal');
   if ('IntersectionObserver' in window) {
@@ -27,11 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }, { threshold: 0.15 });
     revealElements.forEach(el => revealObserver.observe(el));
-  } else {
-    revealElements.forEach(el => el.classList.add('active'));
-  }
+  } else revealElements.forEach(el => el.classList.add('active'));
 
-  // Show Discord application activities only; never expose profile or online status.
+  // Show application activities only; never expose profile or online status.
   const presenceCard = document.getElementById('discord-presence');
   if (presenceCard) {
     const userId = '1242039694540279838';
@@ -46,10 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressFill = document.getElementById('discord-activity-fill');
     const elapsedTime = document.getElementById('discord-activity-elapsed');
     const durationTime = document.getElementById('discord-activity-duration');
-    let socket;
-    let heartbeat;
-    let reconnectTimer;
-    let progressTimer;
+    let socket, heartbeat, reconnectTimer, progressTimer;
     let reconnectDelay = 1000;
     let closedByPage = false;
     let renderVersion = 0;
@@ -64,25 +57,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const typeLabels = { 0: 'Playing', 1: 'Streaming', 2: 'Listening to', 3: 'Watching', 5: 'Competing in' };
 
-    const imageCandidates = (key, activity) => {
+    const candidatesFor = (key, activity) => {
       if (!key) return [];
       if (/^https?:\/\//i.test(key)) return [key];
       if (key.startsWith('mp:external/')) {
-        const path = key.slice('mp:external/'.length);
-        const firstPart = path.split('/')[0];
+        // Discord encodes external asset URLs in mp:external/<encoded URL>/<size>.
+        const rest = key.slice('mp:external/'.length);
+        const match = rest.match(/^(https?%3A%2F%2F[^/]+(?:%2F[^/]+)*)\/(?:\d+)(?:\?.*)?$/i);
+        if (match) {
+          try { return [decodeURIComponent(match[1])]; } catch (_) {}
+        }
         try {
-          const decoded = decodeURIComponent(firstPart);
-          if (/^https?:\/\//i.test(decoded)) return [decoded];
-        } catch (_) { /* Try Discord's media proxy. */ }
-        return [`https://media.discordapp.net/${path}`];
+          const decoded = decodeURIComponent(rest);
+          const urlMatch = decoded.match(/https?:\/\/[^\s]+/i);
+          if (urlMatch) return [urlMatch[0]];
+        } catch (_) {}
+        return [`https://media.discordapp.net/external/${rest}`];
       }
+      // Spotify's artwork key is an image identifier, not an app asset.
       if (key.startsWith('spotify:')) return [`https://i.scdn.co/image/${key.slice('spotify:'.length)}`];
-      const candidates = [];
-      if (activity.application_id) {
-        const assetKey = key.replace(/^mp:/, '');
-        ['png', 'webp', 'jpg'].forEach(ext => candidates.push(`https://cdn.discordapp.com/app-assets/${activity.application_id}/${assetKey}.${ext}?size=512`));
-      }
-      return candidates;
+      if (key.startsWith('https://i.scdn.co/')) return [key];
+
+      const appId = activity.application_id;
+      if (!appId) return [];
+      // Discord RPC asset keys must be requested through the application-assets
+      // endpoint. Try supported formats and the legacy app-assets route.
+      const encodedKey = encodeURIComponent(key.replace(/^mp:/, ''));
+      return [
+        `https://cdn.discordapp.com/app-assets/${appId}/${encodedKey}.png?size=512`,
+        `https://cdn.discordapp.com/app-assets/${appId}/${encodedKey}.webp?size=512`,
+        `https://cdn.discordapp.com/app-assets/${appId}/${encodedKey}.jpg?size=512`,
+        `https://cdn.discordapp.com/app-assets/${appId}/${encodedKey}?size=512`,
+        `https://cdn.discordapp.com/app-assets/${appId}/${encodedKey}.png`,
+        `https://cdn.discordapp.com/applications/${appId}/assets/${encodedKey}.png?size=512`,
+        `https://cdn.discordapp.com/applications/${appId}/assets/${encodedKey}.webp?size=512`
+      ];
     };
 
     const preload = candidates => new Promise(resolve => {
@@ -100,19 +109,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const formatTime = milliseconds => {
       const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
-      const minutes = Math.floor(totalSeconds / 60);
-      const seconds = totalSeconds % 60;
-      return `${minutes}:${String(seconds).padStart(2, '0')}`;
+      return `${Math.floor(totalSeconds / 60)}:${String(totalSeconds % 60).padStart(2, '0')}`;
     };
 
     const updateProgress = () => {
       if (!currentTimestamps || !currentTimestamps.start || !currentTimestamps.end) return;
-      const now = Date.now();
       const duration = Math.max(0, currentTimestamps.end - currentTimestamps.start);
-      const elapsed = Math.min(duration, Math.max(0, now - currentTimestamps.start));
-      progressFill.style.width = `${duration ? (elapsed / duration) * 100 : 0}%`;
+      const elapsed = Math.min(duration, Math.max(0, Date.now() - currentTimestamps.start));
+      progressFill.style.width = `${duration ? elapsed / duration * 100 : 0}%`;
       elapsedTime.textContent = formatTime(elapsed);
       durationTime.textContent = formatTime(duration);
+    };
+
+    const setImage = (element, url) => new Promise(resolve => {
+      if (!element || !url) return resolve(false);
+      element.onload = () => resolve(true);
+      element.onerror = () => resolve(false);
+      element.src = url;
+    });
+
+    const loadAsset = async (keys, activity) => {
+      for (const key of keys) {
+        for (const url of candidatesFor(key, activity)) {
+          const probe = new Image();
+          const loaded = await new Promise(resolve => {
+            probe.onload = () => resolve(true);
+            probe.onerror = () => resolve(false);
+            probe.src = url;
+          });
+          if (loaded) return url;
+        }
+      }
+      return '';
     };
 
     const renderPresence = async data => {
@@ -144,21 +172,17 @@ document.addEventListener('DOMContentLoaded', () => {
         progress.hidden = false;
         updateProgress();
         progressTimer = setInterval(updateProgress, 1000);
-      } else {
-        progress.hidden = true;
-      }
+      } else progress.hidden = true;
 
-      const largeCandidates = imageCandidates(activity.assets && activity.assets.large_image, activity);
-      const smallCandidates = imageCandidates(activity.assets && activity.assets.small_image, activity);
-      const [largeUrl, smallUrl] = await Promise.all([preload(largeCandidates), preload(smallCandidates)]);
+      const [largeUrl, smallUrl] = await Promise.all([
+        loadAsset([activity.assets && activity.assets.large_image], activity),
+        loadAsset([activity.assets && activity.assets.small_image], activity)
+      ]);
       if (version !== renderVersion) return;
 
-      if (largeUrl) {
-        activityImage.src = largeUrl;
-        activityImage.hidden = false;
-        activityArt.hidden = false;
-      } else if (smallUrl) {
-        activityImage.src = smallUrl;
+      const mainUrl = largeUrl || smallUrl;
+      if (mainUrl) {
+        activityImage.src = mainUrl;
         activityImage.hidden = false;
         activityArt.hidden = false;
       } else {
@@ -178,12 +202,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const connect = () => {
       if (closedByPage) return;
-      try {
-        socket = new WebSocket('wss://api.lanyard.rest/socket');
-      } catch (_) {
-        scheduleReconnect();
-        return;
-      }
+      try { socket = new WebSocket('wss://api.lanyard.rest/socket'); }
+      catch (_) { scheduleReconnect(); return; }
       socket.addEventListener('open', () => { reconnectDelay = 1000; });
       socket.addEventListener('message', event => {
         let message;
