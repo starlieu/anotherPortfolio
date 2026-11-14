@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     revealElements.forEach(el => el.classList.add('active'));
   }
 
-  // Show all Discord activities exposed by Lanyard, without rendering profile or online status.
+  // Render every activity exposed by Lanyard (except custom status), never profile or status.
   const presenceCard = document.getElementById('discord-presence');
   if (presenceCard) {
     const userId = '1242039694540279838';
@@ -39,16 +39,58 @@ document.addEventListener('DOMContentLoaded', () => {
     const activityDetails = document.getElementById('discord-activity-details');
     const activityState = document.getElementById('discord-activity-state');
     const activityImage = document.getElementById('discord-activity-image');
+    const activityArt = activityImage && activityImage.parentElement;
     let socket;
     let heartbeat;
     let reconnectTimer;
     let reconnectDelay = 1000;
     let closedByPage = false;
 
-    const renderPresence = data => {
+    if (activityImage) {
+      activityImage.loading = 'eager';
+      activityImage.decoding = 'async';
+      activityImage.fetchPriority = 'high';
+    }
+
+    const getImageUrl = activity => {
+      const assets = activity && activity.assets;
+      if (!assets) return '';
+      const image = assets.large_image || assets.small_image;
+      if (!image) return '';
+      if (/^https?:\/\//i.test(image)) return image;
+
+      // Lanyard may return external images as mp:external/<encoded-url>/<size>.
+      if (image.startsWith('mp:external/')) {
+        const externalPath = image.slice('mp:external/'.length);
+        const encodedUrl = externalPath.split('/')[0];
+        try {
+          const decodedUrl = decodeURIComponent(encodedUrl);
+          if (/^https?:\/\//i.test(decodedUrl)) return decodedUrl;
+        } catch (_) { /* Use Discord media proxy fallback below. */ }
+        return `https://media.discordapp.net/${externalPath}`;
+      }
+
+      // Spotify uses its own image URL rather than the Discord app-assets endpoint.
+      if (activity.name === 'Spotify' && /^spotify:/i.test(image)) {
+        return `https://i.scdn.co/image/${image.slice('spotify:'.length)}`;
+      }
+      if (activity.application_id) {
+        const assetKey = image.replace(/^mp:/, '');
+        return `https://cdn.discordapp.com/app-assets/${activity.application_id}/${assetKey}.png?size=256`;
+      }
+      return '';
+    };
+
+    const preloadImage = url => new Promise(resolve => {
+      if (!url) return resolve(false);
+      const probe = new Image();
+      probe.onload = () => resolve(true);
+      probe.onerror = () => resolve(false);
+      probe.src = url;
+    });
+
+    const renderPresence = async data => {
       const activities = Array.isArray(data && data.activities) ? data.activities : [];
-      // Exclude only Discord custom status (type 4). Keep games, streaming, listening/music,
-      // watching, competing and app RPCs (including those without application_id).
       const activity = activities.find(item => item && item.type !== 4 &&
         (item.name || item.details || item.state || item.assets));
 
@@ -63,24 +105,25 @@ document.addEventListener('DOMContentLoaded', () => {
       activityState.textContent = activity.state || '';
       activityState.hidden = !activity.state;
 
-      const image = activity.assets && (activity.assets.large_image || activity.assets.small_image);
-      let imageUrl = '';
-      if (image && /^https?:\/\//i.test(image)) {
-        imageUrl = image;
-      } else if (image && image.startsWith('mp:external/')) {
-        imageUrl = `https://media.discordapp.net/${image.slice(3)}`;
-      } else if (image && activity.application_id) {
-        imageUrl = `https://cdn.discordapp.com/app-assets/${activity.application_id}/${image}.png`;
-      }
-
+      const imageUrl = getImageUrl(activity);
       if (imageUrl) {
-        activityImage.src = imageUrl;
-        activityImage.hidden = false;
-        presenceCard.classList.add('has-image');
+        // Load the image eagerly before revealing the widget, avoiding an empty placeholder.
+        const loaded = await preloadImage(imageUrl);
+        // Ignore a late image response if a newer activity has replaced this one.
+        if (activityName.textContent !== (activity.name || 'Rich Presence')) return;
+        if (loaded) {
+          activityImage.src = imageUrl;
+          activityImage.hidden = false;
+          if (activityArt) activityArt.hidden = false;
+        } else {
+          activityImage.removeAttribute('src');
+          activityImage.hidden = true;
+          if (activityArt) activityArt.hidden = true;
+        }
       } else {
         activityImage.removeAttribute('src');
         activityImage.hidden = true;
-        presenceCard.classList.remove('has-image');
+        if (activityArt) activityArt.hidden = true;
       }
       presenceCard.hidden = false;
     };
