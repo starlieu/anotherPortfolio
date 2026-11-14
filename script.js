@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     revealElements.forEach(el => el.classList.add('active'));
   }
 
-  // Render a Discord activity and its activity-type label; never render profile/status.
+  // Show Discord application activities only; never expose profile or online status.
   const presenceCard = document.getElementById('discord-presence');
   if (presenceCard) {
     const userId = '1242039694540279838';
@@ -39,105 +39,139 @@ document.addEventListener('DOMContentLoaded', () => {
     const activityName = document.getElementById('discord-activity-name');
     const activityDetails = document.getElementById('discord-activity-details');
     const activityState = document.getElementById('discord-activity-state');
+    const activityArt = document.getElementById('discord-activity-art');
     const activityImage = document.getElementById('discord-activity-image');
-    const activityArt = activityImage && activityImage.parentElement;
+    const activitySmallImage = document.getElementById('discord-activity-small-image');
+    const progress = document.getElementById('discord-activity-progress');
+    const progressFill = document.getElementById('discord-activity-fill');
+    const elapsedTime = document.getElementById('discord-activity-elapsed');
+    const durationTime = document.getElementById('discord-activity-duration');
     let socket;
     let heartbeat;
     let reconnectTimer;
+    let progressTimer;
     let reconnectDelay = 1000;
     let closedByPage = false;
     let renderVersion = 0;
+    let currentTimestamps = null;
 
-    if (activityImage) {
-      activityImage.loading = 'eager';
-      activityImage.decoding = 'async';
-      activityImage.fetchPriority = 'high';
-    }
+    [activityImage, activitySmallImage].forEach(image => {
+      if (!image) return;
+      image.loading = 'eager';
+      image.decoding = 'async';
+      image.fetchPriority = 'high';
+    });
 
-    const typeLabels = {
-      0: 'Playing',
-      1: 'Streaming',
-      2: 'Listening to',
-      3: 'Watching',
-      5: 'Competing in'
-    };
+    const typeLabels = { 0: 'Playing', 1: 'Streaming', 2: 'Listening to', 3: 'Watching', 5: 'Competing in' };
 
-    const normalizeImageKey = key => {
-      if (!key) return '';
-      if (/^https?:\/\//i.test(key)) return key;
+    const imageCandidates = (key, activity) => {
+      if (!key) return [];
+      if (/^https?:\/\//i.test(key)) return [key];
       if (key.startsWith('mp:external/')) {
-        const externalPath = key.slice('mp:external/'.length);
-        const encodedUrl = externalPath.split('/')[0];
+        const path = key.slice('mp:external/'.length);
+        const firstPart = path.split('/')[0];
         try {
-          const decoded = decodeURIComponent(encodedUrl);
-          if (/^https?:\/\//i.test(decoded)) return decoded;
-        } catch (_) { /* Try Discord's image proxy below. */ }
-        return `https://media.discordapp.net/${externalPath}`;
+          const decoded = decodeURIComponent(firstPart);
+          if (/^https?:\/\//i.test(decoded)) return [decoded];
+        } catch (_) { /* Try Discord's media proxy. */ }
+        return [`https://media.discordapp.net/${path}`];
       }
-      if (key.startsWith('spotify:')) return `https://i.scdn.co/image/${key.slice('spotify:'.length)}`;
-      return '';
-    };
-
-    const getImageCandidates = activity => {
-      const assets = activity && activity.assets;
-      if (!assets) return [];
+      if (key.startsWith('spotify:')) return [`https://i.scdn.co/image/${key.slice('spotify:'.length)}`];
       const candidates = [];
-      // Lanyard can return a direct URL, a Discord proxy key, or an app asset key.
-      [assets.large_image, assets.small_image].filter(Boolean).forEach(key => {
-        const direct = normalizeImageKey(key);
-        if (direct) candidates.push(direct);
-        else if (activity.application_id) {
-          const assetKey = key.replace(/^mp:/, '');
-          candidates.push(`https://cdn.discordapp.com/app-assets/${activity.application_id}/${assetKey}.png?size=512`);
-          candidates.push(`https://cdn.discordapp.com/app-assets/${activity.application_id}/${assetKey}.webp?size=512`);
-        }
-      });
-      return [...new Set(candidates)];
+      if (activity.application_id) {
+        const assetKey = key.replace(/^mp:/, '');
+        ['png', 'webp', 'jpg'].forEach(ext => candidates.push(`https://cdn.discordapp.com/app-assets/${activity.application_id}/${assetKey}.${ext}?size=512`));
+      }
+      return candidates;
     };
 
-    const preloadImage = candidates => new Promise(resolve => {
-      if (!candidates.length) return resolve('');
+    const preload = candidates => new Promise(resolve => {
       let index = 0;
-      const tryNext = () => {
+      const next = () => {
         if (index >= candidates.length) return resolve('');
         const url = candidates[index++];
         const probe = new Image();
         probe.onload = () => resolve(url);
-        probe.onerror = tryNext;
+        probe.onerror = next;
         probe.src = url;
       };
-      tryNext();
+      next();
     });
+
+    const formatTime = milliseconds => {
+      const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    };
+
+    const updateProgress = () => {
+      if (!currentTimestamps || !currentTimestamps.start || !currentTimestamps.end) return;
+      const now = Date.now();
+      const duration = Math.max(0, currentTimestamps.end - currentTimestamps.start);
+      const elapsed = Math.min(duration, Math.max(0, now - currentTimestamps.start));
+      progressFill.style.width = `${duration ? (elapsed / duration) * 100 : 0}%`;
+      elapsedTime.textContent = formatTime(elapsed);
+      durationTime.textContent = formatTime(duration);
+    };
 
     const renderPresence = async data => {
       const activities = Array.isArray(data && data.activities) ? data.activities : [];
-      // Exclude custom status only. Preserve games, streaming, music, watching and competing.
       const activity = activities.find(item => item && item.type !== 4 &&
         (item.name || item.details || item.state || item.assets));
       const version = ++renderVersion;
-
       if (!activity) {
         presenceCard.hidden = true;
+        clearInterval(progressTimer);
+        currentTimestamps = null;
         return;
       }
 
-      if (activityLabel) activityLabel.textContent = typeLabels[activity.type] || 'Activity';
+      const label = typeLabels[activity.type] || 'Activity';
+      activityLabel.textContent = activity.type === 2 && activity.name === 'Spotify'
+        ? `Listening to ${activity.details || activity.name}`
+        : `${label}${activity.type === 1 && activity.url ? ` ${activity.name || ''}` : ''}`.trim();
       activityName.textContent = activity.name || 'Rich Presence';
       activityDetails.textContent = activity.details || '';
       activityDetails.hidden = !activity.details;
       activityState.textContent = activity.state || '';
       activityState.hidden = !activity.state;
 
-      const imageUrl = await preloadImage(getImageCandidates(activity));
+      const timestamps = activity.timestamps || {};
+      currentTimestamps = activity.type === 2 && timestamps.start && timestamps.end ? timestamps : null;
+      clearInterval(progressTimer);
+      if (currentTimestamps) {
+        progress.hidden = false;
+        updateProgress();
+        progressTimer = setInterval(updateProgress, 1000);
+      } else {
+        progress.hidden = true;
+      }
+
+      const largeCandidates = imageCandidates(activity.assets && activity.assets.large_image, activity);
+      const smallCandidates = imageCandidates(activity.assets && activity.assets.small_image, activity);
+      const [largeUrl, smallUrl] = await Promise.all([preload(largeCandidates), preload(smallCandidates)]);
       if (version !== renderVersion) return;
-      if (imageUrl) {
-        activityImage.src = imageUrl;
+
+      if (largeUrl) {
+        activityImage.src = largeUrl;
         activityImage.hidden = false;
-        if (activityArt) activityArt.hidden = false;
+        activityArt.hidden = false;
+      } else if (smallUrl) {
+        activityImage.src = smallUrl;
+        activityImage.hidden = false;
+        activityArt.hidden = false;
       } else {
         activityImage.removeAttribute('src');
         activityImage.hidden = true;
-        if (activityArt) activityArt.hidden = true;
+        activityArt.hidden = true;
+      }
+      if (largeUrl && smallUrl && largeUrl !== smallUrl) {
+        activitySmallImage.src = smallUrl;
+        activitySmallImage.hidden = false;
+      } else {
+        activitySmallImage.removeAttribute('src');
+        activitySmallImage.hidden = true;
       }
       presenceCard.hidden = false;
     };
@@ -146,14 +180,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (closedByPage) return;
       try {
         socket = new WebSocket('wss://api.lanyard.rest/socket');
-      } catch (error) {
+      } catch (_) {
         scheduleReconnect();
         return;
       }
       socket.addEventListener('open', () => { reconnectDelay = 1000; });
       socket.addEventListener('message', event => {
         let message;
-        try { message = JSON.parse(event.data); } catch (error) { return; }
+        try { message = JSON.parse(event.data); } catch (_) { return; }
         if (message.op === 1 && message.d && message.d.heartbeat_interval) {
           clearInterval(heartbeat);
           heartbeat = setInterval(() => {
@@ -185,6 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('beforeunload', () => {
       closedByPage = true;
       clearInterval(heartbeat);
+      clearInterval(progressTimer);
       clearTimeout(reconnectTimer);
       if (socket) socket.close();
     });
