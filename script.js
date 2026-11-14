@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     revealElements.forEach(el => el.classList.add('active'));
   }
 
-  // Show application Rich Presence (including games and third-party apps), never profile/status.
+  // Show all Discord activities exposed by Lanyard, without rendering profile or online status.
   const presenceCard = document.getElementById('discord-presence');
   if (presenceCard) {
     const userId = '1242039694540279838';
@@ -47,12 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderPresence = data => {
       const activities = Array.isArray(data && data.activities) ? data.activities : [];
-      // Lanyard activity types: 0=Game, 1=Streaming, 2=Listening, 3=Watching, 4=Custom, 5=Competing.
-      // Keep app/game activities with an application_id; exclude custom status and Spotify/music listening.
-      const activity = activities.find(item =>
-        item && item.type !== 4 && item.type !== 2 && item.application_id &&
-        (item.name || item.details || item.state || item.assets)
-      );
+      // Exclude only Discord custom status (type 4). Keep games, streaming, listening/music,
+      // watching, competing and app RPCs (including those without application_id).
+      const activity = activities.find(item => item && item.type !== 4 &&
+        (item.name || item.details || item.state || item.assets));
 
       if (!activity) {
         presenceCard.hidden = true;
@@ -69,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
       let imageUrl = '';
       if (image && /^https?:\/\//i.test(image)) {
         imageUrl = image;
-      } else if (image && activity.application_id && image.startsWith('mp:external/')) {
+      } else if (image && image.startsWith('mp:external/')) {
         imageUrl = `https://media.discordapp.net/${image.slice(3)}`;
       } else if (image && activity.application_id) {
         imageUrl = `https://cdn.discordapp.com/app-assets/${activity.application_id}/${image}.png`;
