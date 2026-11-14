@@ -31,10 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
     revealElements.forEach(el => el.classList.add('active'));
   }
 
-  // Render every activity exposed by Lanyard (except custom status), never profile or status.
+  // Render a Discord activity and its activity-type label; never render profile/status.
   const presenceCard = document.getElementById('discord-presence');
   if (presenceCard) {
     const userId = '1242039694540279838';
+    const activityLabel = document.getElementById('discord-activity-label');
     const activityName = document.getElementById('discord-activity-name');
     const activityDetails = document.getElementById('discord-activity-details');
     const activityState = document.getElementById('discord-activity-state');
@@ -45,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let reconnectTimer;
     let reconnectDelay = 1000;
     let closedByPage = false;
+    let renderVersion = 0;
 
     if (activityImage) {
       activityImage.loading = 'eager';
@@ -52,74 +54,86 @@ document.addEventListener('DOMContentLoaded', () => {
       activityImage.fetchPriority = 'high';
     }
 
-    const getImageUrl = activity => {
-      const assets = activity && activity.assets;
-      if (!assets) return '';
-      const image = assets.large_image || assets.small_image;
-      if (!image) return '';
-      if (/^https?:\/\//i.test(image)) return image;
+    const typeLabels = {
+      0: 'Playing',
+      1: 'Streaming',
+      2: 'Listening to',
+      3: 'Watching',
+      5: 'Competing in'
+    };
 
-      // Lanyard may return external images as mp:external/<encoded-url>/<size>.
-      if (image.startsWith('mp:external/')) {
-        const externalPath = image.slice('mp:external/'.length);
+    const normalizeImageKey = key => {
+      if (!key) return '';
+      if (/^https?:\/\//i.test(key)) return key;
+      if (key.startsWith('mp:external/')) {
+        const externalPath = key.slice('mp:external/'.length);
         const encodedUrl = externalPath.split('/')[0];
         try {
-          const decodedUrl = decodeURIComponent(encodedUrl);
-          if (/^https?:\/\//i.test(decodedUrl)) return decodedUrl;
-        } catch (_) { /* Use Discord media proxy fallback below. */ }
+          const decoded = decodeURIComponent(encodedUrl);
+          if (/^https?:\/\//i.test(decoded)) return decoded;
+        } catch (_) { /* Try Discord's image proxy below. */ }
         return `https://media.discordapp.net/${externalPath}`;
       }
-
-      // Spotify uses its own image URL rather than the Discord app-assets endpoint.
-      if (activity.name === 'Spotify' && /^spotify:/i.test(image)) {
-        return `https://i.scdn.co/image/${image.slice('spotify:'.length)}`;
-      }
-      if (activity.application_id) {
-        const assetKey = image.replace(/^mp:/, '');
-        return `https://cdn.discordapp.com/app-assets/${activity.application_id}/${assetKey}.png?size=256`;
-      }
+      if (key.startsWith('spotify:')) return `https://i.scdn.co/image/${key.slice('spotify:'.length)}`;
       return '';
     };
 
-    const preloadImage = url => new Promise(resolve => {
-      if (!url) return resolve(false);
-      const probe = new Image();
-      probe.onload = () => resolve(true);
-      probe.onerror = () => resolve(false);
-      probe.src = url;
+    const getImageCandidates = activity => {
+      const assets = activity && activity.assets;
+      if (!assets) return [];
+      const candidates = [];
+      // Lanyard can return a direct URL, a Discord proxy key, or an app asset key.
+      [assets.large_image, assets.small_image].filter(Boolean).forEach(key => {
+        const direct = normalizeImageKey(key);
+        if (direct) candidates.push(direct);
+        else if (activity.application_id) {
+          const assetKey = key.replace(/^mp:/, '');
+          candidates.push(`https://cdn.discordapp.com/app-assets/${activity.application_id}/${assetKey}.png?size=512`);
+          candidates.push(`https://cdn.discordapp.com/app-assets/${activity.application_id}/${assetKey}.webp?size=512`);
+        }
+      });
+      return [...new Set(candidates)];
+    };
+
+    const preloadImage = candidates => new Promise(resolve => {
+      if (!candidates.length) return resolve('');
+      let index = 0;
+      const tryNext = () => {
+        if (index >= candidates.length) return resolve('');
+        const url = candidates[index++];
+        const probe = new Image();
+        probe.onload = () => resolve(url);
+        probe.onerror = tryNext;
+        probe.src = url;
+      };
+      tryNext();
     });
 
     const renderPresence = async data => {
       const activities = Array.isArray(data && data.activities) ? data.activities : [];
+      // Exclude custom status only. Preserve games, streaming, music, watching and competing.
       const activity = activities.find(item => item && item.type !== 4 &&
         (item.name || item.details || item.state || item.assets));
+      const version = ++renderVersion;
 
       if (!activity) {
         presenceCard.hidden = true;
         return;
       }
 
+      if (activityLabel) activityLabel.textContent = typeLabels[activity.type] || 'Activity';
       activityName.textContent = activity.name || 'Rich Presence';
       activityDetails.textContent = activity.details || '';
       activityDetails.hidden = !activity.details;
       activityState.textContent = activity.state || '';
       activityState.hidden = !activity.state;
 
-      const imageUrl = getImageUrl(activity);
+      const imageUrl = await preloadImage(getImageCandidates(activity));
+      if (version !== renderVersion) return;
       if (imageUrl) {
-        // Load the image eagerly before revealing the widget, avoiding an empty placeholder.
-        const loaded = await preloadImage(imageUrl);
-        // Ignore a late image response if a newer activity has replaced this one.
-        if (activityName.textContent !== (activity.name || 'Rich Presence')) return;
-        if (loaded) {
-          activityImage.src = imageUrl;
-          activityImage.hidden = false;
-          if (activityArt) activityArt.hidden = false;
-        } else {
-          activityImage.removeAttribute('src');
-          activityImage.hidden = true;
-          if (activityArt) activityArt.hidden = true;
-        }
+        activityImage.src = imageUrl;
+        activityImage.hidden = false;
+        if (activityArt) activityArt.hidden = false;
       } else {
         activityImage.removeAttribute('src');
         activityImage.hidden = true;
