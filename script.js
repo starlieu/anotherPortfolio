@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     revealElements.forEach(el => el.classList.add('active'));
   }
 
-  // Render only custom/regular Discord activities: no Discord username, avatar, or online status.
+  // Show application Rich Presence (including games and third-party apps), never profile/status.
   const presenceCard = document.getElementById('discord-presence');
   if (presenceCard) {
     const userId = '1242039694540279838';
@@ -47,22 +47,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderPresence = data => {
       const activities = Array.isArray(data && data.activities) ? data.activities : [];
-      // Ignore Spotify (type 2) and custom status text (type 4); show an app Rich Presence only.
-      const activity = activities.find(item => item && item.type !== 2 && item.type !== 4 && (item.details || item.state || item.assets || item.name));
+      // Lanyard activity types: 0=Game, 1=Streaming, 2=Listening, 3=Watching, 4=Custom, 5=Competing.
+      // Keep app/game activities with an application_id; exclude custom status and Spotify/music listening.
+      const activity = activities.find(item =>
+        item && item.type !== 4 && item.type !== 2 && item.application_id &&
+        (item.name || item.details || item.state || item.assets)
+      );
+
       if (!activity) {
         presenceCard.hidden = true;
         return;
       }
 
-      activityName.textContent = activity.name || 'Activité';
+      activityName.textContent = activity.name || 'Rich Presence';
       activityDetails.textContent = activity.details || '';
+      activityDetails.hidden = !activity.details;
       activityState.textContent = activity.state || '';
       activityState.hidden = !activity.state;
 
       const image = activity.assets && (activity.assets.large_image || activity.assets.small_image);
-      const imageUrl = image && (image.startsWith('https://') || image.startsWith('http://')
-        ? image
-        : `https://cdn.discordapp.com/app-assets/${activity.application_id}/${image}.png`);
+      let imageUrl = '';
+      if (image && /^https?:\/\//i.test(image)) {
+        imageUrl = image;
+      } else if (image && activity.application_id && image.startsWith('mp:external/')) {
+        imageUrl = `https://media.discordapp.net/${image.slice(3)}`;
+      } else if (image && activity.application_id) {
+        imageUrl = `https://cdn.discordapp.com/app-assets/${activity.application_id}/${image}.png`;
+      }
+
       if (imageUrl) {
         activityImage.src = imageUrl;
         activityImage.hidden = false;
