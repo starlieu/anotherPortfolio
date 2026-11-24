@@ -171,44 +171,53 @@ body { background-color: var(--bg-dark); color: var(--text-main); font-family: v
   .hero-tagline { font-size: 0.95rem; }
 }
 
-/* Mobile hero profile: left-align content while preserving the site's visual style */
+/* Mobile profile layout: full-width left-aligned content, retain centered desktop layout */
 @media (max-width: 768px) {
-  .hero-section {
-    align-items: flex-start;
+  #hero.hero-section {
+    display: block;
+    width: 100%;
+    padding: 6rem 1.25rem 3rem;
     text-align: left;
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
   }
-  .hero-content {
+  #hero .hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     width: 100%;
     max-width: none;
+    margin: 0;
+    text-align: left;
   }
-  .avatar-wrapper {
+  #hero .avatar-wrapper {
     display: block;
-    width: fit-content;
-    margin-left: 0;
+    width: auto;
+    margin: 0 0 1.5rem;
   }
-  .hero-title,
-  .hero-username {
+  #hero .hero-title,
+  #hero .hero-username {
+    width: 100%;
     text-align: left;
   }
-  .pronouns-badge {
-    display: table;
+  #hero .pronouns-badge {
+    display: inline-block;
     margin-left: 0;
     margin-right: 0;
   }
-  .hero-tagline {
-    max-width: 100%;
-    margin-left: 0;
-    margin-right: 0;
+  #hero .hero-tagline {
+    width: 100%;
+    max-width: none;
+    margin: 0 0 2.25rem;
     text-align: left;
   }
-  .hero-actions,
-  .social-links {
+  #hero .hero-actions,
+  #hero .social-links {
+    width: 100%;
     justify-content: flex-start;
   }
-  .discord-presence {
+  #hero .discord-presence {
+    width: 100%;
     margin-left: 0;
     margin-right: 0;
+    align-self: stretch;
   }
 }
