@@ -170,3 +170,45 @@ body { background-color: var(--bg-dark); color: var(--text-main); font-family: v
   .hero-title { font-size: 1.55rem; }
   .hero-tagline { font-size: 0.95rem; }
 }
+
+/* Mobile hero profile: left-align content while preserving the site's visual style */
+@media (max-width: 768px) {
+  .hero-section {
+    align-items: flex-start;
+    text-align: left;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+  .hero-content {
+    width: 100%;
+    max-width: none;
+  }
+  .avatar-wrapper {
+    display: block;
+    width: fit-content;
+    margin-left: 0;
+  }
+  .hero-title,
+  .hero-username {
+    text-align: left;
+  }
+  .pronouns-badge {
+    display: table;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .hero-tagline {
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    text-align: left;
+  }
+  .hero-actions,
+  .social-links {
+    justify-content: flex-start;
+  }
+  .discord-presence {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
