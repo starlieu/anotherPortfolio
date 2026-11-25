@@ -48,15 +48,15 @@ body::before { content: ''; position: fixed; z-index: -2; inset: 0; background-i
 .nav-toggle { display: none; padding: .55rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-strong); cursor: pointer; flex-direction: column; gap: 5px; }
 .nav-toggle span { display: block; width: 22px; height: 2px; background: var(--text); }
 
-/* Profile: banner is a clipped top strip; avatar/name sit beneath with clear spacing. */
+/* Profile: banner at the top, with a soft animated fade at its lower edge. */
 .hero-section { position: relative; min-height: 680px; display: flex; align-items: center; justify-content: center; padding: 7rem 1.5rem 4rem; overflow: hidden; text-align: center; }
 .hero-content { position: relative; isolation: isolate; width: min(100%,800px); padding: 0 2.3rem 2.3rem; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--hero-frame-bg); overflow: hidden; }
 .hero-content > .banner-container { position: relative; z-index: 0; width: calc(100% + 4.6rem); height: clamp(190px,28vw,260px); margin: 0 -2.3rem 2rem; overflow: hidden; border-radius: var(--radius-card) var(--radius-card) 0 0; pointer-events: none; }
 .hero-banner { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
-.banner-blur { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; filter: blur(var(--banner-fade-blur)); -webkit-mask-image: linear-gradient(to bottom,transparent 20%,#000 100%); mask-image: linear-gradient(to bottom,transparent 20%,#000 100%); pointer-events: none; }
-/* The lower edge breathes gently between transparent and the frame color. */
-.banner-overlay { position: absolute; z-index: 2; inset: 0; pointer-events: none; background: linear-gradient(to bottom, transparent 32%, color-mix(in srgb, var(--hero-frame-bg) 16%, transparent) 57%, var(--hero-frame-bg) 100%); animation: banner-fade var(--banner-fade-duration) ease-in-out infinite alternate; }
-@keyframes banner-fade { 0% { opacity: .68; background-position: 50% 0%; } 100% { opacity: 1; background-position: 50% 100%; } }
+.banner-blur { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; filter: blur(var(--banner-fade-blur)); -webkit-mask-image: linear-gradient(to bottom, transparent 20%, #000 100%); mask-image: linear-gradient(to bottom, transparent 20%, #000 100%); pointer-events: none; }
+/* Animate only the gradient opacity: the fade stays smooth and doesn't shift the layout. */
+.banner-overlay { position: absolute; z-index: 2; inset: 0; pointer-events: none; background: linear-gradient(to bottom, transparent 30%, color-mix(in srgb, var(--hero-frame-bg) 28%, transparent) 62%, var(--hero-frame-bg) 100%); animation: banner-fade var(--banner-fade-duration) ease-in-out infinite alternate; }
+@keyframes banner-fade { from { opacity: .72; } to { opacity: 1; } }
 .profile-identity { position: relative; z-index: 3; display: flex; align-items: center; justify-content: center; gap: 1.2rem; }
 .avatar-wrapper { display: inline-block; position: relative; flex: 0 0 auto; margin-bottom: 1.2rem; }
 .profile-identity .avatar-wrapper { margin: 0; }
@@ -174,6 +174,4 @@ body::before { content: ''; position: fixed; z-index: -2; inset: 0; background-i
   .hero-avatar { width: 100px; height: 100px; }
   .hero-actions { justify-content: flex-start; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .banner-overlay { animation: none; }
-}
+@media (prefers-reduced-motion: reduce) { .banner-overlay { animation: none; } }
