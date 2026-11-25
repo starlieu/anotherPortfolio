@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css?v=20261125-banner-fade-2" />
+  <link rel="stylesheet" href="./style.css?v=20261125-banner-fade-3" />
   <style>
     .discord-presence { display:block; width:min(100%, 1000px); margin:28px auto 0; padding:36px 38px 30px; border:2px solid rgba(191,172,194,.45); border-radius:28px; background:linear-gradient(135deg,rgba(191,172,194,.3) 0%,rgba(80,56,104,.78) 100%); color:#f0eaf3; text-align:left; box-shadow:0 10px 28px rgba(23,14,29,.28); }
     .discord-presence[hidden] { display:none; }
@@ -16,28 +16,43 @@
     .discord-presence-main { display:flex; align-items:center; gap:28px; min-height:140px; }
     .discord-presence-art { position:relative; display:grid; place-items:center; width:140px; height:140px; flex:none; }
     .discord-presence-art[hidden] { display:none; }
-    .discord-presence-image { display:block; width:140px; height:140px; border-radius:12px; object-fit:cover; background:#e5d8e8; }
+    .discord-presence-image { width:100%; height:100%; object-fit:cover; border-radius:18px; }
     .discord-presence-image[hidden] { display:none; }
-    .discord-presence-small-image { position:absolute; right:-8px; bottom:-8px; width:52px; height:52px; border:3px solid #503868; border-radius:50%; object-fit:cover; background:#e5d8e8; }
-    .discord-presence-small-image[hidden] { display:none; }
+    .discord-presence-status { position:absolute; right:-4px; bottom:-4px; width:22px; height:22px; border:4px solid #302b35; border-radius:50%; background:#43b581; }
     .discord-presence-copy { min-width:0; flex:1; }
-    .discord-presence-name { overflow:hidden; color:#fff; font-size:1.7rem; font-weight:700; text-overflow:ellipsis; white-space:nowrap; }
-    .discord-presence-detail { overflow:hidden; margin-top:2px; color:#f0eaf3; font-size:1.3rem; line-height:1.4; text-overflow:ellipsis; white-space:nowrap; }
+    .discord-presence-name { margin:0 0 8px; font-size:1.2rem; font-weight:600; }
+    .discord-presence-detail { margin:0; color:#f0eaf3; font-size:.98rem; line-height:1.5; }
     .discord-presence-detail[hidden] { display:none; }
+    .discord-presence-activities { display:flex; flex-wrap:wrap; gap:12px; margin-top:18px; }
+    .discord-presence-activity { display:flex; align-items:center; gap:12px; min-width:0; padding:10px 12px; border-radius:16px; background:rgba(25,18,31,.26); }
+    .discord-presence-activity img { width:44px; height:44px; flex:none; object-fit:cover; border-radius:12px; }
+    .discord-presence-activity-copy { min-width:0; }
+    .discord-presence-activity-copy p { margin:2px 0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .discord-presence-progress { margin-top:28px; }
     .discord-presence-progress[hidden] { display:none; }
-    .discord-presence-track { height:10px; overflow:hidden; border-radius:999px; background:rgba(255,255,255,.22); }
-    .discord-presence-fill { width:0; height:100%; border-radius:inherit; background:linear-gradient(90deg,#bfacc2,#e6d5ea); transition:width .5s linear; }
-    .discord-presence-times { display:flex; justify-content:space-between; margin-top:10px; color:#f0eaf3; font-size:1.15rem; font-variant-numeric:tabular-nums; }
-    @media (max-width:600px) { .discord-presence { padding:24px 22px; border-radius:22px; } .discord-presence-label { margin-bottom:18px; font-size:1.2rem; } .discord-presence-main { gap:18px; min-height:0; } .discord-presence-art,.discord-presence-image { width:88px; height:88px; } .discord-presence-small-image { width:36px; height:36px; right:-5px; bottom:-5px; border-width:2px; } .discord-presence-name { font-size:1.2rem; } .discord-presence-detail { font-size:.98rem; } .discord-presence-progress { margin-top:22px; } .discord-presence-times { font-size:.95rem; } }
+    .discord-presence-progress-label { display:flex; justify-content:space-between; gap:12px; margin-bottom:10px; font-size:.82rem; }
+    .discord-presence-progress-track { height:8px; overflow:hidden; border-radius:999px; background:rgba(20,15,25,.4); }
+    .discord-presence-progress-fill { height:100%; border-radius:inherit; background:linear-gradient(90deg,#b89dca,#eee4f4); box-shadow:0 0 15px rgba(238,228,244,.38); }
+    @media (max-width: 700px) {
+      .discord-presence { padding:26px 22px 22px; }
+      .discord-presence-label { font-size:1.35rem; }
+      .discord-presence-main { align-items:flex-start; gap:18px; }
+      .discord-presence-art { width:105px; height:105px; }
+    }
+    @media (max-width: 480px) {
+      .discord-presence { padding:22px 18px 18px; }
+      .discord-presence-main { flex-direction:column; }
+      .discord-presence-art { width:90px; height:90px; }
+      .discord-presence-activities { flex-direction:column; }
+    }
   </style>
 </head>
 <body>
   <canvas id="starsCanvas" aria-hidden="true"></canvas>
   <header class="navbar">
     <div class="nav-container">
-      <div class="nav-logo"></div>
-      <nav class="nav-links">
+      <a class="nav-logo" href="#hero">starlie</a>
+      <nav class="nav-links" id="navLinks">
         <a href="#hero">home</a>
         <a href="#er-clan">community</a>
         <a href="#orbit">Old Community</a>
@@ -66,62 +81,100 @@
       <div class="hero-actions">
         <a href="https://chromia.lol/profile/698" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Chromia Profile</a>
         <a href="https://discord.gg/TYyqtyAMc" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">ER Clan</a>
-        <a href="#projects" class="btn btn-outline">Projects</a>
       </div>
-      <div class="social-links" aria-label="Mes réseaux sociaux">
+      <div class="social-links">
         <a href="https://www.instagram.com/starlieu_" target="_blank" rel="noopener noreferrer" class="social-link"><span>Instagram</span></a>
         <a href="https://www.tiktok.com/@.starlieu" target="_blank" rel="noopener noreferrer" class="social-link"><span>TikTok</span></a>
         <a href="https://youtube.com/@starlieu" target="_blank" rel="noopener noreferrer" class="social-link"><span>YouTube</span></a>
       </div>
-      <article id="discord-presence" class="discord-presence" hidden aria-live="polite" aria-label="Activité Discord">
-        <div id="discord-activity-label" class="discord-presence-label"></div>
+      <article id="discordPresence" class="discord-presence" hidden aria-live="polite">
+        <p class="discord-presence-label">DISCORD PRESENCE</p>
         <div class="discord-presence-main">
-          <div id="discord-activity-art" class="discord-presence-art" hidden>
-            <img id="discord-activity-image" class="discord-presence-image" alt="Illustration de l’activité" loading="eager" decoding="async" fetchpriority="high" />
-            <img id="discord-activity-small-image" class="discord-presence-small-image" alt="" loading="eager" decoding="async" fetchpriority="high" hidden />
+          <div class="discord-presence-art" hidden>
+            <img class="discord-presence-image" alt="" hidden />
+            <span class="discord-presence-status" aria-hidden="true"></span>
           </div>
           <div class="discord-presence-copy">
-            <div id="discord-activity-name" class="discord-presence-name"></div>
-            <div id="discord-activity-details" class="discord-presence-detail" hidden></div>
-            <div id="discord-activity-state" class="discord-presence-detail" hidden></div>
+            <p class="discord-presence-name"></p>
+            <p class="discord-presence-detail" hidden></p>
           </div>
         </div>
-        <div id="discord-activity-progress" class="discord-presence-progress" hidden>
-          <div class="discord-presence-track"><div id="discord-activity-fill" class="discord-presence-fill"></div></div>
-          <div class="discord-presence-times"><span id="discord-activity-elapsed">0:00</span><span id="discord-activity-duration">0:00</span></div>
+        <div class="discord-presence-activities"></div>
+        <div class="discord-presence-progress" hidden>
+          <div class="discord-presence-progress-label"><span>Activity progress</span><span class="discord-presence-progress-time"></span></div>
+          <div class="discord-presence-progress-track"><div class="discord-presence-progress-fill"></div></div>
         </div>
       </article>
     </div>
   </section>
 
   <main class="container">
-    <section id="er-clan" class="section reveal community-section">
-      <div class="orbit-card er-clan-card"><div class="orbit-glow er-clan-glow"></div><div class="orbit-content">
-        <span class="section-tag er-clan-tag">Main Community</span><h2 class="orbit-title">ER Clan</h2>
-        <p class="orbit-description er-clan-description">Join the ER Clan community.</p><p class="orbit-subtext">Find the community and connect with us on Discord.</p>
-        <div class="orbit-action"><a href="https://discord.gg/TYyqtyAMc" target="_blank" rel="noopener noreferrer" class="btn btn-orbit btn-er-clan">Join ER Clan ↗</a></div>
-      </div></div>
+    <section id="er-clan" class="section community-section">
+      <div class="section-header"><span class="section-tag">OUR COMMUNITY</span><h2>ER Clan</h2></div>
+      <article class="orbit-card er-clan-card">
+        <div class="orbit-glow er-clan-glow"></div>
+        <div class="orbit-content">
+          <span class="section-tag er-clan-tag">JOIN THE COMMUNITY</span>
+          <h3 class="orbit-title">ER Clan</h3>
+          <p class="orbit-description">A friendly community for gamers and internet people.</p>
+          <p class="orbit-subtext er-clan-description">Come hang out, chat, find friends, and play games together.</p>
+          <a href="https://discord.gg/TYyqtyAMc" target="_blank" rel="noopener noreferrer" class="btn btn-er-clan">Join ER Clan</a>
+        </div>
+      </article>
     </section>
-    <section id="orbit" class="section reveal community-section">
-      <div class="orbit-card old-community-card"><div class="orbit-glow"></div><div class="orbit-content">
-        <span class="section-tag old-community-tag">Old Community</span><h2 class="orbit-title">⋆｡°✩ star's orbit</h2>
-        <p class="orbit-description">my community, my little corner of the internet.</p><p class="orbit-subtext">A relaxed space to chat, meet people, share projects, chill, and follow what I'm working on.</p>
-        <div class="orbit-action"><a href="https://discord.gg/PfgEyK7M7E" target="_blank" rel="noopener noreferrer" class="btn btn-orbit">Join star's orbit ↗</a></div>
-      </div></div>
+
+    <section id="orbit" class="section community-section">
+      <div class="section-header"><span class="section-tag">OLD COMMUNITY</span><h2>Old Community</h2></div>
+      <article class="orbit-card">
+        <div class="orbit-glow"></div>
+        <div class="orbit-content">
+          <span class="section-tag">ARCHIVE</span>
+          <h3 class="orbit-title">Old Community</h3>
+          <p class="orbit-description">The previous place to meet the community.</p>
+          <p class="orbit-subtext">This server is no longer the main community, but remains available for its members.</p>
+          <a href="https://discord.gg/PfgEyK7M7E" target="_blank" rel="noopener noreferrer" class="btn">Visit Old Community</a>
+        </div>
+      </article>
     </section>
-    <section id="about" class="section reveal"><div class="section-header"><span class="section-tag">Identity</span><h2>About Me</h2></div><div class="about-card">
-      <p class="about-intro">Hey, I'm <strong>starlie</strong> 🇫🇷.</p><p class="about-text">I'm just someone from France who loves technology, coding, and experimenting with software and games. Whether it's testing projects, tweaking setups, or diving into open-source stuff, I enjoy exploring how things work behind the scenes.</p>
-      <div class="interests-grid"><div class="interest-item"><span>💻</span> Tech & Programming</div><div class="interest-item"><span>🧪</span> Experimenting & Modding</div><div class="interest-item"><span>🌐</span> Open-Source Projects</div><div class="interest-item"><span>🎵</span> Chromia</div><div class="interest-item"><span>🔍</span> Testing & Debugging</div></div>
-    </div></section>
-    <section id="projects" class="section reveal"><div class="section-header"><span class="section-tag">Work & Exploration</span><h2>Projects & Activity</h2></div><div class="projects-grid">
-      <article class="project-card featured"><div class="card-badge">Open Source</div><h3 class="project-title">anotherPortfolio</h3><p class="project-subtitle">HTML / CSS / JS</p><p class="project-description">The source code and base template for this personal portfolio website, open for exploration and customization.</p><div class="project-footer"><a href="https://github.com/starlieu/anotherPortfolio" target="_blank" rel="noopener noreferrer" class="link-btn">View Repository ↗</a></div></article>
-      <article class="project-card"><div class="card-badge">Game & Community</div><h3 class="project-title">Chromia</h3><p class="project-subtitle">player / community member</p><p class="project-description">Playing Chromia and supporting its community. Visit the official website, check out the open-source repository, join the Discord server, or view my game profile.</p><div class="project-footer"><a href="https://chromia.lol/" target="_blank" rel="noopener noreferrer" class="link-btn">Official Website ↗</a> · <a href="https://github.com/iloverhythia/Chromia" target="_blank" rel="noopener noreferrer" class="link-btn">GitHub ↗</a> · <a href="https://chromia.lol/profile/698" target="_blank" rel="noopener noreferrer" class="link-btn">My Profile ↗</a></div></article>
-      <article class="project-card"><div class="card-badge">Code</div><h3 class="project-title">GitHub Profile</h3><p class="project-subtitle">@starlieu</p><p class="project-description">Check out my public repositories, contributions, and random technical experiments directly on GitHub.</p><div class="project-footer"><a href="https://github.com/starlieu" target="_blank" rel="noopener noreferrer" class="link-btn">Open GitHub ↗</a></div></article>
-    </div></section>
+
+    <section id="about" class="section">
+      <div class="section-header"><span class="section-tag">A LITTLE ABOUT ME</span><h2>About</h2></div>
+      <div class="about-card">
+        <div>
+          <p class="about-intro">Hey, I'm <strong>starlie</strong> 🇫🇷.</p><p class="about-text">I'm just someone from France who loves technology, coding, and experimenting with software and games. Whether it's testing projects, tweaking setups, or diving into open-source stuff, I enjoy exploring how things work behind the scenes.</p>
+          <div class="interests-grid">
+            <div class="interest-item">💻 Coding</div><div class="interest-item">🎮 Gaming</div><div class="interest-item">🧪 Experimenting</div><div class="interest-item">✨ Technology</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects" class="section">
+      <div class="section-header"><span class="section-tag">THINGS I'VE MADE</span><h2>Projects</h2></div>
+      <div class="projects-grid">
+        <article class="project-card featured"><div class="card-badge">Open Source</div><h3 class="project-title">anotherPortfolio</h3><p class="project-subtitle">HTML / CSS / JS</p><p class="project-description">The source code and base template for this personal portfolio website, open for exploration and customization.</p><div class="project-footer"><a href="https://github.com/starlieu/anotherPortfolio" target="_blank" rel="noopener noreferrer" class="link-btn">View Repository ↗</a></div></article>
+        <article class="project-card"><div class="card-badge">Code</div><h3 class="project-title">Discord Activity</h3><p class="project-subtitle">JavaScript / API</p><p class="project-description">A live Discord activity widget that displays the current status and games using Lanyard data.</p><div class="project-footer"><a href="https://github.com/Phineas/lanyard" target="_blank" rel="noopener noreferrer" class="link-btn">Learn More ↗</a></div></article>
+      </div>
+    </section>
+
+    <section id="links" class="section">
+      <div class="section-header"><span class="section-tag">FIND ME ONLINE</span><h2>Links</h2></div>
+      <div class="links-grid">
+        <a href="https://github.com/starlieu" target="_blank" rel="noopener noreferrer" class="quick-link-card"><span class="link-name">GitHub</span><span class="link-url">github.com/starlieu</span></a>
+        <a href="https://discord.gg/TYyqtyAMc" target="_blank" rel="noopener noreferrer" class="quick-link-card highlight"><span class="link-name">ER Clan</span><span class="link-url">discord.gg/TYyqtyAMc</span></a>
+        <a href="https://discord.gg/PfgEyK7M7E" target="_blank" rel="noopener noreferrer" class="quick-link-card"><span class="link-name">Old Community</span><span class="link-url">discord.gg/PfgEyK7M7E</span></a>
+        <a href="https://www.instagram.com/starlieu_" target="_blank" rel="noopener noreferrer" class="quick-link-card"><span class="link-name">Instagram</span><span class="link-url">instagram.com/starlieu_</span></a>
+        <a href="https://www.tiktok.com/@.starlieu" target="_blank" rel="noopener noreferrer" class="quick-link-card"><span class="link-name">TikTok</span><span class="link-url">tiktok.com/@.starlieu</span></a>
+        <a href="https://youtube.com/@starlieu" target="_blank" rel="noopener noreferrer" class="quick-link-card"><span class="link-name">YouTube</span><span class="link-url">youtube.com/@starlieu</span></a>
+        <a href="https://chromia.lol/" target="_blank" rel="noopener noreferrer" class="quick-link-card"><span class="link-name">Chromia</span><span class="link-url">chromia.lol</span></a>
+      </div>
+    </section>
   </main>
-  <footer class="footer"><div class="footer-content"><div class="footer-brand">✦･ﾟ 𝐬𝐭𝐚𝐫𝐥𝐢𝐞 ﾟ･✦</div><div class="footer-links">
-    <a href="https://github.com/starlieu" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://discord.gg/TYyqtyAMc" target="_blank" rel="noopener noreferrer">ER Clan</a><a href="https://discord.gg/PfgEyK7M7E" target="_blank" rel="noopener noreferrer">star's orbit (old)</a><a href="https://www.instagram.com/starlieu_" target="_blank" rel="noopener noreferrer">Instagram</a><a href="https://www.tiktok.com/@.starlieu" target="_blank" rel="noopener noreferrer">TikTok</a><a href="https://youtube.com/@starlieu" target="_blank" rel="noopener noreferrer">YouTube</a><a href="https://chromia.lol/" target="_blank" rel="noopener noreferrer">Chromia</a>
-  </div><p class="footer-copy">&copy; <span id="year"></span> starlie. All rights reserved.</p></div></footer>
-  <script src="./script.js?v=20261114-rp-art-fix"></script>
+
+  <footer class="footer">
+    <div class="footer-brand">starlie</div>
+    <div class="footer-links"><a href="https://github.com/starlieu" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://discord.gg/TYyqtyAMc" target="_blank" rel="noopener noreferrer">ER Clan</a><a href="https://discord.gg/PfgEyK7M7E" target="_blank" rel="noopener noreferrer">star's orbit (old)</a><a href="https://www.instagram.com/starlieu_" target="_blank" rel="noopener noreferrer">Instagram</a><a href="https://www.tiktok.com/@.starlieu" target="_blank" rel="noopener noreferrer">TikTok</a><a href="https://youtube.com/@starlieu" target="_blank" rel="noopener noreferrer">YouTube</a><a href="https://chromia.lol/" target="_blank" rel="noopener noreferrer">Chromia</a></div><p class="footer-copy">&copy; <span id="year"></span> starlie. All rights reserved.</p>
+  </footer>
+  <script src="./script.js"></script>
 </body>
 </html>
