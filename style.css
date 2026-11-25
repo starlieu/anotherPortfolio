@@ -1,4 +1,4 @@
-/* ==========================================================================
+/* ========================================================================== 
    Thème personnalisable — modifiez ces variables pour changer l'ambiance
    ========================================================================== */
 :root {
@@ -70,12 +70,12 @@ body::before {
 .hero-section { position: relative; min-height: 680px; display: flex; align-items: center; justify-content: center; padding: 7rem 1.5rem 4rem; overflow: hidden; text-align: center; }
 .hero-content { position: relative; isolation: isolate; width: min(100%, 800px); padding: 0 2.3rem 2.3rem; border: 1px solid var(--border); border-radius: var(--radius-card); background: rgba(48,46,50,.28); overflow: hidden; }
 /* Keep the banner in normal flow: this reserves its height and guarantees content starts after it. */
-.hero-content > .banner-container { position: relative; z-index: 0; width: calc(100% + 4.6rem); height: clamp(190px, 28vw, 260px); margin: 0 -2.3rem 2rem; overflow: hidden; border-radius: var(--radius-card) var(--radius-card) 0 0; pointer-events: none; }
-.hero-banner { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; filter: none; }
-/* Fondu flou en bas de la bannière : l'image se dissout dans la frame. */
+.hero-content > .banner-container { position: relative; z-index: 0; width: calc(100% + 4.6rem); height: clamp(190px, 28vw, 260px); margin: 0 -2.3rem 2rem; overflow: visible; pointer-events: none; }
+.hero-banner { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; border-radius: var(--radius-card) var(--radius-card) 0 0; filter: none; }
+/* Fondu flou en bas de la bannière, prolongé de 40px dans la frame. */
 .banner-overlay { position: absolute; inset: 0; background: none; }
 .banner-overlay::before,
-.banner-overlay::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: var(--banner-fade-height); pointer-events: none; }
+.banner-overlay::after { content: ''; position: absolute; left: 0; right: 0; bottom: -40px; height: var(--banner-fade-height); pointer-events: none; }
 /* Flou progressif : appliqué seulement en bas grâce au masque. */
 .banner-overlay::before {
   -webkit-backdrop-filter: blur(var(--banner-fade-blur));
@@ -83,9 +83,9 @@ body::before {
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 100%);
   mask-image: linear-gradient(to bottom, transparent 0%, #000 100%);
 }
-/* Dégradé de couleur vers le fond de la frame pour un raccord sans coupure. */
+/* Dégradé opaque vers la couleur sombre de la frame pour un raccord sans coupure. */
 .banner-overlay::after {
-  background: linear-gradient(to bottom, rgba(34,33,37,0) 0%, rgba(34,33,37,.55) 60%, rgba(34,33,37,.92) 100%);
+  background: linear-gradient(to bottom, rgba(38,36,42,0) 0%, rgba(38,36,42,.55) 60%, #26242a 100%);
 }
 .profile-identity { display: flex; align-items: center; justify-content: center; gap: 1.2rem; }
 .avatar-wrapper { display: inline-block; position: relative; flex: 0 0 auto; margin-bottom: 1.2rem; }
