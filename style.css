@@ -4,7 +4,7 @@
 :root {
   color-scheme: dark;
   --page-bg: #171619;
-  --page-image: url('./banner.jpg'); /* Image d'arrière-plan : remplacez banner.jpg */
+  --page-image: url('./bg.jpg'); /* Image d'arrière-plan : remplacez banner.jpg */
   --surface: rgba(37, 36, 40, .48);
   --surface-strong: rgba(28, 27, 31, .72);
   --surface-hover: rgba(54, 52, 58, .68);
