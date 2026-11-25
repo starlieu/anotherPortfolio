@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css?v=20261125-banner-fade-3" />
+  <link rel="stylesheet" href="./style.css?v=20261125-banner-fade-4" />
   <style>
     .discord-presence { display:block; width:min(100%, 1000px); margin:28px auto 0; padding:36px 38px 30px; border:2px solid rgba(191,172,194,.45); border-radius:28px; background:linear-gradient(135deg,rgba(191,172,194,.3) 0%,rgba(80,56,104,.78) 100%); color:#f0eaf3; text-align:left; box-shadow:0 10px 28px rgba(23,14,29,.28); }
     .discord-presence[hidden] { display:none; }
@@ -67,6 +67,7 @@
     <div class="hero-content">
       <div class="banner-container" aria-hidden="true">
         <img src="./banner.jpg" alt="" class="hero-banner" />
+        <img src="./banner.jpg" alt="" class="banner-blur" />
         <div class="banner-overlay"></div>
       </div>
       <div class="profile-identity">
@@ -88,11 +89,11 @@
         <a href="https://youtube.com/@starlieu" target="_blank" rel="noopener noreferrer" class="social-link"><span>YouTube</span></a>
       </div>
       <article id="discordPresence" class="discord-presence" hidden aria-live="polite">
-        <p class="discord-presence-label">DISCORD PRESENCE</p>
+        <p class="discord-presence-label">Discord presence</p>
         <div class="discord-presence-main">
           <div class="discord-presence-art" hidden>
             <img class="discord-presence-image" alt="" hidden />
-            <span class="discord-presence-status" aria-hidden="true"></span>
+            <span class="discord-presence-status" hidden></span>
           </div>
           <div class="discord-presence-copy">
             <p class="discord-presence-name"></p>
@@ -101,80 +102,56 @@
         </div>
         <div class="discord-presence-activities"></div>
         <div class="discord-presence-progress" hidden>
-          <div class="discord-presence-progress-label"><span>Activity progress</span><span class="discord-presence-progress-time"></span></div>
+          <div class="discord-presence-progress-label"><span>Progress</span><span></span></div>
           <div class="discord-presence-progress-track"><div class="discord-presence-progress-fill"></div></div>
         </div>
       </article>
     </div>
   </section>
 
-  <main class="container">
-    <section id="er-clan" class="section community-section">
-      <div class="section-header"><span class="section-tag">OUR COMMUNITY</span><h2>ER Clan</h2></div>
-      <article class="orbit-card er-clan-card">
-        <div class="orbit-glow er-clan-glow"></div>
-        <div class="orbit-content">
-          <span class="section-tag er-clan-tag">JOIN THE COMMUNITY</span>
-          <h3 class="orbit-title">ER Clan</h3>
-          <p class="orbit-description">A friendly community for gamers and internet people.</p>
-          <p class="orbit-subtext er-clan-description">Come hang out, chat, find friends, and play games together.</p>
-          <a href="https://discord.gg/TYyqtyAMc" target="_blank" rel="noopener noreferrer" class="btn btn-er-clan">Join ER Clan</a>
-        </div>
-      </article>
-    </section>
+  <section id="about" class="about-section">
+    <div class="about-card">
+      <h2 class="section-title">about</h2>
+      <p>I'm starlie — building things, testing things, and exploring.</p>
+    </div>
+  </section>
 
-    <section id="orbit" class="section community-section">
-      <div class="section-header"><span class="section-tag">OLD COMMUNITY</span><h2>Old Community</h2></div>
-      <article class="orbit-card">
-        <div class="orbit-glow"></div>
-        <div class="orbit-content">
-          <span class="section-tag">ARCHIVE</span>
-          <h3 class="orbit-title">Old Community</h3>
-          <p class="orbit-description">The previous place to meet the community.</p>
-          <p class="orbit-subtext">This server is no longer the main community, but remains available for its members.</p>
-          <a href="https://discord.gg/PfgEyK7M7E" target="_blank" rel="noopener noreferrer" class="btn">Visit Old Community</a>
-        </div>
-      </article>
-    </section>
+  <section id="er-clan" class="er-clan-section">
+    <div class="er-clan-card">
+      <div class="er-clan-glow"></div>
+      <p class="er-clan-label">community</p>
+      <h2 class="er-clan-title">ER Clan</h2>
+      <p class="er-clan-description">A community for friends and fun.</p>
+      <div class="er-clan-stats"><span class="er-clan-stat">Join us</span></div>
+      <div class="er-clan-actions"><a href="https://discord.gg/TYyqtyAMc" class="btn btn-er-clan">Join Discord</a></div>
+    </div>
+  </section>
 
-    <section id="about" class="section">
-      <div class="section-header"><span class="section-tag">A LITTLE ABOUT ME</span><h2>About</h2></div>
-      <div class="about-card">
-        <div>
-          <p class="about-intro">Hey, I'm <strong>starlie</strong> 🇫🇷.</p><p class="about-text">I'm just someone from France who loves technology, coding, and experimenting with software and games. Whether it's testing projects, tweaking setups, or diving into open-source stuff, I enjoy exploring how things work behind the scenes.</p>
-          <div class="interests-grid">
-            <div class="interest-item">💻 Coding</div><div class="interest-item">🎮 Gaming</div><div class="interest-item">🧪 Experimenting</div><div class="interest-item">✨ Technology</div>
-          </div>
-        </div>
-      </div>
-    </section>
+  <section id="orbit" class="orbit-section-old">
+    <div class="orbit-card-old">
+      <div class="orbit-glow-old"></div>
+      <p class="orbit-label-old">archive</p>
+      <h2 class="orbit-title-old">Old Community</h2>
+      <p class="orbit-description-old">A previous community project.</p>
+      <div class="orbit-stats-old"></div>
+      <div class="orbit-actions-old"></div>
+    </div>
+  </section>
 
-    <section id="projects" class="section">
-      <div class="section-header"><span class="section-tag">THINGS I'VE MADE</span><h2>Projects</h2></div>
-      <div class="projects-grid">
-        <article class="project-card featured"><div class="card-badge">Open Source</div><h3 class="project-title">anotherPortfolio</h3><p class="project-subtitle">HTML / CSS / JS</p><p class="project-description">The source code and base template for this personal portfolio website, open for exploration and customization.</p><div class="project-footer"><a href="https://github.com/starlieu/anotherPortfolio" target="_blank" rel="noopener noreferrer" class="link-btn">View Repository ↗</a></div></article>
-        <article class="project-card"><div class="card-badge">Code</div><h3 class="project-title">Discord Activity</h3><p class="project-subtitle">JavaScript / API</p><p class="project-description">A live Discord activity widget that displays the current status and games using Lanyard data.</p><div class="project-footer"><a href="https://github.com/Phineas/lanyard" target="_blank" rel="noopener noreferrer" class="link-btn">Learn More ↗</a></div></article>
-      </div>
-    </section>
+  <section id="projects" class="projects-section">
+    <h2 class="section-title">projects</h2>
+    <div class="projects-grid"></div>
+  </section>
 
-    <section id="links" class="section">
-      <div class="section-header"><span class="section-tag">FIND ME ONLINE</span><h2>Links</h2></div>
-      <div class="links-grid">
-        <a href="https://github.com/starlieu" target="_blank" rel="noopener noreferrer" class="quick-link-card"><span class="link-name">GitHub</span><span class="link-url">github.com/starlieu</span></a>
-        <a href="https://discord.gg/TYyqtyAMc" target="_blank" rel="noopener noreferrer" class="quick-link-card highlight"><span class="link-name">ER Clan</span><span class="link-url">discord.gg/TYyqtyAMc</span></a>
-        <a href="https://discord.gg/PfgEyK7M7E" target="_blank" rel="noopener noreferrer" class="quick-link-card"><span class="link-name">Old Community</span><span class="link-url">discord.gg/PfgEyK7M7E</span></a>
-        <a href="https://www.instagram.com/starlieu_" target="_blank" rel="noopener noreferrer" class="quick-link-card"><span class="link-name">Instagram</span><span class="link-url">instagram.com/starlieu_</span></a>
-        <a href="https://www.tiktok.com/@.starlieu" target="_blank" rel="noopener noreferrer" class="quick-link-card"><span class="link-name">TikTok</span><span class="link-url">tiktok.com/@.starlieu</span></a>
-        <a href="https://youtube.com/@starlieu" target="_blank" rel="noopener noreferrer" class="quick-link-card"><span class="link-name">YouTube</span><span class="link-url">youtube.com/@starlieu</span></a>
-        <a href="https://chromia.lol/" target="_blank" rel="noopener noreferrer" class="quick-link-card"><span class="link-name">Chromia</span><span class="link-url">chromia.lol</span></a>
-      </div>
-    </section>
-  </main>
+  <section class="quick-links-section">
+    <div class="quick-links-grid"></div>
+  </section>
 
   <footer class="footer">
-    <div class="footer-brand">starlie</div>
-    <div class="footer-links"><a href="https://github.com/starlieu" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://discord.gg/TYyqtyAMc" target="_blank" rel="noopener noreferrer">ER Clan</a><a href="https://discord.gg/PfgEyK7M7E" target="_blank" rel="noopener noreferrer">star's orbit (old)</a><a href="https://www.instagram.com/starlieu_" target="_blank" rel="noopener noreferrer">Instagram</a><a href="https://www.tiktok.com/@.starlieu" target="_blank" rel="noopener noreferrer">TikTok</a><a href="https://youtube.com/@starlieu" target="_blank" rel="noopener noreferrer">YouTube</a><a href="https://chromia.lol/" target="_blank" rel="noopener noreferrer">Chromia</a></div><p class="footer-copy">&copy; <span id="year"></span> starlie. All rights reserved.</p>
+    <div class="footer-links"></div>
+    <p>© 2026 starlie</p>
   </footer>
+
   <script src="./script.js"></script>
 </body>
 </html>
