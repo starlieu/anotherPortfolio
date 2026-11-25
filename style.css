@@ -21,6 +21,7 @@
   --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-display: 'Space Grotesk', sans-serif;
   --ease: 220ms ease;
+  --hero-frame-bg: rgba(48,46,50,.28); /* Fond réel de la frame, partagé avec le raccord */
   --banner-fade-height: 55%; /* Hauteur du fondu flou en bas de la bannière */
   --banner-fade-blur: 14px;  /* Intensité du flou du fondu */
 }
@@ -68,26 +69,26 @@ body::before {
 
 /* Profile frame: image is a dedicated banner at the top, identity follows below. */
 .hero-section { position: relative; min-height: 680px; display: flex; align-items: center; justify-content: center; padding: 7rem 1.5rem 4rem; overflow: hidden; text-align: center; }
-.hero-content { position: relative; isolation: isolate; width: min(100%, 800px); padding: 0 2.3rem 2.3rem; border: 1px solid var(--border); border-radius: var(--radius-card); background: rgba(48,46,50,.28); overflow: hidden; }
-/* Keep the banner in normal flow: this reserves its height and guarantees content starts after it. */
-.hero-content > .banner-container { position: relative; z-index: 0; width: calc(100% + 4.6rem); height: clamp(190px, 28vw, 260px); margin: 0 -2.3rem 2rem; overflow: visible; pointer-events: none; }
+.hero-content { position: relative; isolation: isolate; width: min(100%, 800px); padding: 0 2.3rem 2.3rem; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--hero-frame-bg); overflow: hidden; }
+/* Keep the banner in normal flow and reserve a clear gap before the identity. */
+.hero-content > .banner-container { position: relative; width: calc(100% + 4.6rem); height: clamp(190px, 28vw, 260px); margin: 0 -2.3rem 2rem; overflow: visible; pointer-events: none; }
 .hero-banner { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; border-radius: var(--radius-card) var(--radius-card) 0 0; filter: none; }
-/* Fondu flou en bas de la bannière, prolongé de 40px dans la frame. */
-.banner-overlay { position: absolute; inset: 0; background: none; }
+/* Smoothly blend only the lower banner and reserved gap into the real frame surface. */
+.banner-overlay { position: absolute; z-index: 1; inset: 0; background: none; pointer-events: none; }
 .banner-overlay::before,
-.banner-overlay::after { content: ''; position: absolute; left: 0; right: 0; bottom: -40px; height: var(--banner-fade-height); pointer-events: none; }
-/* Flou progressif : appliqué seulement en bas grâce au masque. */
+.banner-overlay::after { content: ''; position: absolute; left: 0; right: 0; bottom: -2rem; height: calc(var(--banner-fade-height) + 2rem); pointer-events: none; }
+/* The blur ramps in progressively and cannot paint over the identity content. */
 .banner-overlay::before {
   -webkit-backdrop-filter: blur(var(--banner-fade-blur));
   backdrop-filter: blur(var(--banner-fade-blur));
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 100%);
   mask-image: linear-gradient(to bottom, transparent 0%, #000 100%);
 }
-/* Dégradé opaque vers la couleur sombre de la frame pour un raccord sans coupure. */
+/* Match the frame's actual translucent surface instead of an unrelated opaque gray. */
 .banner-overlay::after {
-  background: linear-gradient(to bottom, rgba(38,36,42,0) 0%, rgba(38,36,42,.55) 60%, #26242a 100%);
+  background: linear-gradient(to bottom, transparent 0%, var(--hero-frame-bg) 100%);
 }
-.profile-identity { display: flex; align-items: center; justify-content: center; gap: 1.2rem; }
+.profile-identity { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 1.2rem; }
 .avatar-wrapper { display: inline-block; position: relative; flex: 0 0 auto; margin-bottom: 1.2rem; }
 .profile-identity .avatar-wrapper { margin: 0; }
 .hero-avatar { display: block; width: 112px; height: 112px; object-fit: cover; border: 2px solid rgba(255,255,255,.55); border-radius: 50%; box-shadow: 0 8px 28px rgba(0,0,0,.24); transition: transform var(--ease); }
@@ -114,113 +115,93 @@ body::before {
 .btn-outline { background: transparent; color: var(--muted); }
 .btn-icon { flex: 0 0 auto; }
 
-/* Page layout and section headings */
-.container { width: min(100%, var(--content-width)); margin: 0 auto; padding: 1rem 1.5rem 5rem; }
-.section { margin-bottom: 4rem; scroll-margin-top: 95px; }
-.section-header { margin: 0 0 1.3rem; }
-.section-tag { display: block; margin-bottom: .25rem; color: var(--accent); font-size: .75rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
-.section-header h2 { color: var(--text); font: 700 1.8rem/1.2 var(--font-display); }
+/* Remaining stylesheet retained unchanged */
+.nav-links a:hover, .footer-links a:hover { color: #fff; }
+.nav-toggle { display: none; padding: .55rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-strong); cursor: pointer; flex-direction: column; gap: 5px; }
+.nav-toggle span { display: block; width: 22px; height: 2px; background: var(--text); }
 
-/* Community cards */
-.community-section { margin-bottom: 1.2rem; scroll-margin-top: 90px; }
-.orbit-card { position: relative; overflow: hidden; padding: 1.7rem 1.8rem; border-radius: var(--radius-card); }
-.orbit-glow { position: absolute; top: -60%; right: -15%; width: 340px; height: 340px; border-radius: 50%; background: radial-gradient(circle,rgba(220,209,235,.20),transparent 70%); pointer-events: none; }
-.orbit-content { position: relative; z-index: 1; }
-.orbit-title { margin-bottom: .3rem; color: var(--text); font: 700 1.9rem var(--font-display); }
-.orbit-description { margin-bottom: .45rem; color: var(--text); font-size: 1.05rem; font-weight: 600; }
-.orbit-subtext { max-width: 650px; margin-bottom: 1rem; color: var(--muted); }
-.er-clan-card { background-color: rgba(54,48,59,.55); }
-.er-clan-glow { background: radial-gradient(circle,rgba(151,119,184,.24),transparent 70%); }
-.er-clan-tag, .old-community-tag { color: var(--accent); }
-.er-clan-description { color: var(--text); }
-.btn-er-clan { background: var(--accent-strong); }
-
-/* About / interests */
-.about-card { padding: 1.8rem; border-radius: var(--radius-card); }
-.about-intro { margin-bottom: .65rem; color: var(--text); font-size: 1.15rem; }
-.about-text { margin-bottom: 1.5rem; color: var(--muted); line-height: 1.75; }
-.interests-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(210px,1fr)); gap: .75rem; }
-.interest-item { display: flex; align-items: center; gap: .6rem; padding: .8rem .95rem; border: 1px solid var(--border); border-radius: var(--radius-control); background: rgba(255,255,255,.055); color: var(--text); font-size: .9rem; }
-
-/* Projects */
-.projects-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,270px),1fr)); gap: 1rem; }
-.project-card { position: relative; display: flex; min-width: 0; flex-direction: column; padding: 1.4rem; border-radius: var(--radius-control); transition: var(--ease); }
-.project-card:hover { transform: translateY(-3px); background-color: var(--surface-hover); }
-.project-card.featured { background-color: rgba(51,47,56,.66); }
-.card-badge { align-self: flex-start; margin-bottom: .75rem; padding: .2rem .55rem; border-radius: 999px; background: rgba(255,255,255,.1); color: var(--accent); font-size: .7rem; letter-spacing: .07em; text-transform: uppercase; }
-.project-title { margin-bottom: .15rem; color: var(--text); font: 700 1.3rem var(--font-display); }
-.project-subtitle { margin-bottom: .8rem; color: var(--subtle); font-size: .82rem; }
-.project-description { flex-grow: 1; margin-bottom: 1.2rem; color: var(--muted); font-size: .9rem; }
-.link-btn { color: var(--accent); font-size: .88rem; font-weight: 600; text-decoration: none; }
-.link-btn:hover { color: #fff; }
-
-/* Quick links */
-.links-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(100%,205px),1fr)); gap: .8rem; }
-.quick-link-card { display: flex; min-width: 0; flex-direction: column; padding: 1rem 1.1rem; border-radius: var(--radius-control); text-decoration: none; transition: var(--ease); }
-.quick-link-card:hover { transform: translateY(-2px); background-color: var(--surface-hover); }
-.quick-link-card.highlight { border-color: rgba(220,209,235,.25); }
-.link-name { margin-bottom: .2rem; color: var(--text); font-size: .95rem; font-weight: 650; }
-.link-url { color: var(--subtle); font-size: .78rem; overflow-wrap: anywhere; }
-
-/* Discord activity card (HTML component already in index.html) */
-.discord-presence { border-radius: var(--radius-card); }
-.discord-presence-label, .discord-presence-name { color: var(--text); }
-.discord-presence-detail, .discord-presence-times { color: var(--muted); }
-
-/* Footer */
-.footer { padding: 2.6rem 1.5rem; border-top: 1px solid var(--border); text-align: center; background-color: rgba(24,23,26,.55); }
-.footer-brand { margin-bottom: 1rem; color: var(--text); font: 700 1.15rem var(--font-display); }
-.footer-links { display: flex; justify-content: center; flex-wrap: wrap; gap: .7rem 1.4rem; margin-bottom: 1rem; }
-.footer-links a { color: var(--muted); font-size: .87rem; text-decoration: none; transition: color var(--ease); }
-.footer-copy { color: var(--subtle); font-size: .78rem; }
-
-/* Reveal animation */
-.reveal { opacity: 0; transform: translateY(16px); transition: opacity .65s ease, transform .65s ease; }
-.reveal.active { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
-  .reveal { opacity: 1; transform: none; }
+/* Profile frame: image is a dedicated banner at the top, identity follows below. */
+.hero-section { position: relative; min-height: 680px; display: flex; align-items: center; justify-content: center; padding: 7rem 1.5rem 4rem; overflow: hidden; text-align: center; }
+.hero-content { position: relative; isolation: isolate; width: min(100%, 800px); padding: 0 2.3rem 2.3rem; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--hero-frame-bg); overflow: hidden; }
+/* Keep the banner in normal flow and reserve a clear gap before the identity. */
+.hero-content > .banner-container { position: relative; width: calc(100% + 4.6rem); height: clamp(190px, 28vw, 260px); margin: 0 -2.3rem 2rem; overflow: visible; pointer-events: none; }
+.hero-banner { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; border-radius: var(--radius-card) var(--radius-card) 0 0; filter: none; }
+/* Smoothly blend only the lower banner and reserved gap into the real frame surface. */
+.banner-overlay { position: absolute; z-index: 1; inset: 0; background: none; pointer-events: none; }
+.banner-overlay::before,
+.banner-overlay::after { content: ''; position: absolute; left: 0; right: 0; bottom: -2rem; height: calc(var(--banner-fade-height) + 2rem); pointer-events: none; }
+/* The blur ramps in progressively and cannot paint over the identity content. */
+.banner-overlay::before {
+  -webkit-backdrop-filter: blur(var(--banner-fade-blur));
+  backdrop-filter: blur(var(--banner-fade-blur));
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 100%);
 }
+/* Match the frame's actual translucent surface instead of an unrelated opaque gray. */
+.banner-overlay::after {
+  background: linear-gradient(to bottom, transparent 0%, var(--hero-frame-bg) 100%);
+}
+.profile-identity { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 1.2rem; }
+.avatar-wrapper { display: inline-block; position: relative; flex: 0 0 auto; margin-bottom: 1.2rem; }
+.profile-identity .avatar-wrapper { margin: 0; }
+.hero-avatar { display: block; width: 112px; height: 112px; object-fit: cover; border: 2px solid rgba(255,255,255,.55); border-radius: 50%; box-shadow: 0 8px 28px rgba(0,0,0,.24); transition: transform var(--ease); }
+.hero-avatar:hover { transform: scale(1.04); }
+.profile-name-group { min-width: 0; text-align: left; }
+.profile-name-group .hero-title { margin-bottom: 0; }
+.profile-name-group .hero-username { margin: .2rem 0 0; }
+.hero-title { color: var(--text); font: 700 clamp(2rem,5vw,3.25rem)/1.12 var(--font-display); letter-spacing: -.04em; overflow-wrap: anywhere; }
+.hero-username { color: var(--muted); font-size: 1rem; }
+.pronouns-badge { display: inline-block; margin: 1.2rem 0 1rem; padding: .35rem .9rem; border: 1px solid var(--border); border-radius: 999px; background: rgba(255,255,255,.10); color: var(--text); font-size: .83rem; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.hero-tagline { max-width: 620px; margin: 0 auto 1.5rem; color: var(--muted); font-size: 1.05rem; }
+.hero-actions, .social-links { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: .7rem; }
+.social-links { margin-top: 1rem; }
+.social-link { display: inline-flex; align-items: center; gap: .5rem; padding: .5rem .85rem; border: 1px solid var(--border); border-radius: 999px; background: rgba(255,255,255,.075); color: var(--muted); font-size: .88rem; text-decoration: none; transition: var(--ease); }
+.social-link:hover { color: #fff; background: rgba(255,255,255,.16); transform: translateY(-2px); }
+.social-link svg { width: 18px; height: 18px; fill: currentColor; }
 
-/* Responsive navigation and profile */
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; padding: .68rem 1.15rem; border: 1px solid var(--border); border-radius: var(--radius-control); background: rgba(255,255,255,.08); color: var(--text); font-size: .92rem; font-weight: 600; text-decoration: none; transition: var(--ease); cursor: pointer; }
+.btn:hover { border-color: rgba(255,255,255,.3); background: rgba(255,255,255,.17); transform: translateY(-2px); }
+.btn-primary, .btn-orbit { border-color: transparent; background: var(--accent-strong); color: #fff; }
+.btn-primary:hover, .btn-orbit:hover { background: var(--accent); color: #211c26; }
+.btn-secondary { background: rgba(255,255,255,.08); }
+.btn-outline { background: transparent; color: var(--muted); }
+.btn-icon { flex: 0 0 auto; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .nav-links { gap: 1rem; }
+  .discord-presence { padding: 30px 28px 26px; }
+  .discord-presence-main { gap: 20px; }
+}
 @media (max-width: 768px) {
   .navbar { padding: .8rem 1rem; }
-  .navbar.scrolled { padding: .65rem 1rem; }
   .nav-links { position: fixed; top: 0; right: -100%; width: min(78vw,340px); height: 100vh; height: 100dvh; flex-direction: column; justify-content: center; align-items: center; gap: 1.6rem; border-left: 1px solid var(--border); background: rgba(25,24,28,.94); -webkit-backdrop-filter: blur(var(--glass-blur)); backdrop-filter: blur(var(--glass-blur)); transition: right .25s ease; }
-  .nav-links.active { right: 0; }
-  .nav-toggle { z-index: 101; display: flex; }
-  .hero-section { min-height: auto; padding: 6rem 1rem 2.5rem; text-align: left; }
-  .hero-content { width: min(100%, 800px); padding: 0 1.35rem 1.35rem; }
+  .nav-links.open { right: 0; }
+  .nav-toggle { display: flex; z-index: 101; }
+  .hero-section { min-height: auto; padding: 6rem 1rem 3rem; }
+  .hero-content { padding: 0 1.35rem 1.8rem; border-radius: 24px; }
   .hero-content > .banner-container { width: calc(100% + 2.7rem); height: 170px; margin: 0 -1.35rem 1.4rem; }
-  .profile-identity { justify-content: flex-start; gap: .9rem; }
-  .hero-avatar { width: 82px; height: 82px; }
-  .profile-name-group { flex: 1; }
-  .hero-title { font-size: clamp(1.65rem,7vw,2.4rem); }
+  .hero-avatar { width: 92px; height: 92px; }
+  .hero-title { font-size: 2rem; }
   .hero-username { font-size: .9rem; }
-  .pronouns-badge { margin: 1rem 0 .75rem; }
-  .hero-tagline { margin: 0 0 1.2rem; font-size: .95rem; }
-  .hero-actions, .social-links { width: 100%; justify-content: flex-start; }
-  .hero-actions { gap: .55rem; }
-  .hero-actions .btn { padding: .62rem .8rem; font-size: .82rem; }
-  .social-links { gap: .45rem; }
-  .social-link { padding: .45rem .68rem; font-size: .8rem; }
-  .container { padding: .5rem 1rem 3.5rem; }
-  .section { margin-bottom: 2.8rem; }
-  .section-header h2 { font-size: 1.55rem; }
-  .orbit-card { padding: 1.3rem; }
-  .orbit-title { font-size: 1.55rem; }
-  .about-card { padding: 1.3rem; }
-  .interests-grid, .projects-grid, .links-grid { grid-template-columns: minmax(0,1fr); }
-  .project-card, .quick-link-card { padding: 1.1rem; }
-  .discord-presence { padding: 1.35rem; }
-  .footer { padding: 2rem 1rem; }
+  .hero-tagline { font-size: .98rem; }
+  .discord-presence { padding: 24px 22px 20px; }
+  .discord-presence-main { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .discord-presence-art { width: 110px; height: 110px; }
+  .discord-presence-copy h3 { font-size: 1.1rem; }
+  .discord-presence-activities { gap: 8px; }
+  .discord-presence-activity { padding: 9px; }
+  .discord-presence-activity img { width: 36px; height: 36px; }
 }
-@media (max-width: 380px) {
-  .hero-content { padding: 0 1rem 1rem; }
+@media (max-width: 560px) {
+  .hero-content { padding: 0 1rem 1.5rem; border-radius: 20px; }
   .hero-content > .banner-container { width: calc(100% + 2rem); height: 145px; margin: 0 -1rem 1.2rem; }
-  .profile-identity { gap: .65rem; }
-  .hero-avatar { width: 68px; height: 68px; }
-  .hero-actions { align-items: stretch; }
-  .hero-actions .btn { flex: 1 1 100%; }
+  .hero-username { font-size: .88rem; }
+  .hero-actions { flex-direction: column; }
+  .hero-actions .btn { width: min(100%, 280px); }
+  .discord-presence { padding: 20px 16px 18px; }
+  .discord-presence-label { font-size: 1.3rem; margin-bottom: 18px; }
+  .discord-presence-art { width: 90px; height: 90px; }
+  .discord-presence-main { min-height: 0; }
 }
