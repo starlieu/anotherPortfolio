@@ -69,7 +69,7 @@ body::before {
 .hero-content { position: relative; isolation: isolate; width: min(100%, 800px); padding: 2.3rem; border: 1px solid var(--border); border-radius: var(--radius-card); background: rgba(48,46,50,.28); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); overflow: hidden; }
 /* This layer is absolutely confined inside the card's padding box and clipped by its rounded border. */
 .hero-content > .banner-container { position: absolute; z-index: -1; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; }
-.hero-banner { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; filter: brightness(.72); }
+.hero-banner { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; filter: none; }
 .banner-overlay { position: absolute; inset: 0; background: linear-gradient(180deg,rgba(20,19,22,.16) 0%,rgba(20,19,22,.32) 48%,rgba(20,19,22,.62) 100%); }
 .profile-identity { display: flex; align-items: center; justify-content: center; gap: 1.2rem; }
 .avatar-wrapper { display: inline-block; position: relative; flex: 0 0 auto; margin-bottom: 1.2rem; }
