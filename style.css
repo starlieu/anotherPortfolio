@@ -1,4 +1,4 @@
-/* ========================================================================== 
+/* ==========================================================================
    Thème personnalisable — modifiez ces variables pour changer l'ambiance
    ========================================================================== */
 :root {
@@ -64,12 +64,13 @@ body::before {
 .nav-toggle { display: none; padding: .55rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-strong); cursor: pointer; flex-direction: column; gap: 5px; }
 .nav-toggle span { display: block; width: 22px; height: 2px; background: var(--text); }
 
-/* Profile frame: banner in a real top header strip, identity/content below it. */
+/* Profile frame: image is a dedicated banner at the top, identity follows below. */
 .hero-section { position: relative; min-height: 680px; display: flex; align-items: center; justify-content: center; padding: 7rem 1.5rem 4rem; overflow: hidden; text-align: center; }
-.hero-content { position: relative; isolation: isolate; width: min(100%, 800px); padding: 2.3rem; padding-top: 0; border: 1px solid var(--border); border-radius: var(--radius-card); background: rgba(20,19,22,.42); overflow: hidden; }
-.hero-content > .banner-container { position: relative; z-index: -1; width: calc(100% + 4.6rem); height: clamp(190px, 28vw, 260px); margin: 0 -2.3rem 2rem; overflow: hidden; border-radius: var(--radius-card) var(--radius-card) 0 0; pointer-events: none; }
+.hero-content { position: relative; isolation: isolate; width: min(100%, 800px); padding: 0 2.3rem 2.3rem; border: 1px solid var(--border); border-radius: var(--radius-card); background: rgba(48,46,50,.28); overflow: hidden; }
+/* Keep the banner in normal flow: this reserves its height and guarantees content starts after it. */
+.hero-content > .banner-container { position: relative; z-index: 0; width: calc(100% + 4.6rem); height: clamp(190px, 28vw, 260px); margin: 0 -2.3rem 2rem; overflow: hidden; border-radius: var(--radius-card) var(--radius-card) 0 0; pointer-events: none; }
 .hero-banner { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; filter: none; }
-.banner-overlay { position: absolute; inset: 0; background: linear-gradient(180deg,rgba(20,19,22,.02) 0%,rgba(20,19,22,.08) 72%,rgba(20,19,22,.28) 100%); }
+.banner-overlay { position: absolute; inset: 0; background: none; }
 .profile-identity { display: flex; align-items: center; justify-content: center; gap: 1.2rem; }
 .avatar-wrapper { display: inline-block; position: relative; flex: 0 0 auto; margin-bottom: 1.2rem; }
 .profile-identity .avatar-wrapper { margin: 0; }
