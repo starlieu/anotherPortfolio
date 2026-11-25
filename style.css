@@ -22,6 +22,9 @@
   --font-display: 'Space Grotesk', sans-serif;
   --ease: 220ms ease;
   --hero-frame-bg: rgba(20, 19, 22, .62);
+  --banner-fade-height: 55%;
+  --banner-fade-blur: 14px;
+  --banner-fade-duration: 8s;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -50,8 +53,10 @@ body::before { content: ''; position: fixed; z-index: -2; inset: 0; background-i
 .hero-content { position: relative; isolation: isolate; width: min(100%,800px); padding: 0 2.3rem 2.3rem; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--hero-frame-bg); overflow: hidden; }
 .hero-content > .banner-container { position: relative; z-index: 0; width: calc(100% + 4.6rem); height: clamp(190px,28vw,260px); margin: 0 -2.3rem 2rem; overflow: hidden; border-radius: var(--radius-card) var(--radius-card) 0 0; pointer-events: none; }
 .hero-banner { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
-.banner-blur { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; filter: blur(14px); -webkit-mask-image: linear-gradient(to bottom,transparent 20%,#000 100%); mask-image: linear-gradient(to bottom,transparent 20%,#000 100%); pointer-events: none; }
-.banner-overlay { position: absolute; z-index: 2; inset: 0; background: linear-gradient(to bottom,transparent 45%,var(--hero-frame-bg) 100%); pointer-events: none; }
+.banner-blur { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; filter: blur(var(--banner-fade-blur)); -webkit-mask-image: linear-gradient(to bottom,transparent 20%,#000 100%); mask-image: linear-gradient(to bottom,transparent 20%,#000 100%); pointer-events: none; }
+/* The lower edge breathes gently between transparent and the frame color. */
+.banner-overlay { position: absolute; z-index: 2; inset: 0; pointer-events: none; background: linear-gradient(to bottom, transparent 32%, color-mix(in srgb, var(--hero-frame-bg) 16%, transparent) 57%, var(--hero-frame-bg) 100%); animation: banner-fade var(--banner-fade-duration) ease-in-out infinite alternate; }
+@keyframes banner-fade { 0% { opacity: .68; background-position: 50% 0%; } 100% { opacity: 1; background-position: 50% 100%; } }
 .profile-identity { position: relative; z-index: 3; display: flex; align-items: center; justify-content: center; gap: 1.2rem; }
 .avatar-wrapper { display: inline-block; position: relative; flex: 0 0 auto; margin-bottom: 1.2rem; }
 .profile-identity .avatar-wrapper { margin: 0; }
@@ -168,4 +173,7 @@ body::before { content: ''; position: fixed; z-index: -2; inset: 0; background-i
   .profile-name-group { text-align: center; }
   .hero-avatar { width: 100px; height: 100px; }
   .hero-actions { justify-content: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .banner-overlay { animation: none; }
 }
