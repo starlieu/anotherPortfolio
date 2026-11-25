@@ -64,13 +64,12 @@ body::before {
 .nav-toggle { display: none; padding: .55rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-strong); cursor: pointer; flex-direction: column; gap: 5px; }
 .nav-toggle span { display: block; width: 22px; height: 2px; background: var(--text); }
 
-/* Profile hero: banner en haut de la frame, avec le contenu en dessous. */
+/* Profile frame: banner in a real top header strip, identity/content below it. */
 .hero-section { position: relative; min-height: 680px; display: flex; align-items: center; justify-content: center; padding: 7rem 1.5rem 4rem; overflow: hidden; text-align: center; }
-.hero-content { position: relative; isolation: isolate; width: min(100%, 800px); padding: 2.3rem; padding-top: clamp(190px, 28vw, 260px); border: 1px solid var(--border); border-radius: var(--radius-card); background: rgba(48,46,50,.28); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); overflow: hidden; }
-/* Banner occupies a dedicated top strip inside the profile frame. */
-.hero-content > .banner-container { position: absolute; z-index: -1; inset: 0 0 auto; height: clamp(170px, 26vw, 230px); overflow: hidden; border-radius: inherit; pointer-events: none; }
-.hero-banner { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; filter: none; }
-.banner-overlay { position: absolute; inset: 0; background: linear-gradient(180deg,rgba(20,19,22,.04) 0%,rgba(20,19,22,.12) 75%,rgba(20,19,22,.28) 100%); }
+.hero-content { position: relative; isolation: isolate; width: min(100%, 800px); padding: 2.3rem; padding-top: 0; border: 1px solid var(--border); border-radius: var(--radius-card); background: rgba(20,19,22,.42); overflow: hidden; }
+.hero-content > .banner-container { position: relative; z-index: -1; width: calc(100% + 4.6rem); height: clamp(190px, 28vw, 260px); margin: 0 -2.3rem 2rem; overflow: hidden; border-radius: var(--radius-card) var(--radius-card) 0 0; pointer-events: none; }
+.hero-banner { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; filter: none; }
+.banner-overlay { position: absolute; inset: 0; background: linear-gradient(180deg,rgba(20,19,22,.02) 0%,rgba(20,19,22,.08) 72%,rgba(20,19,22,.28) 100%); }
 .profile-identity { display: flex; align-items: center; justify-content: center; gap: 1.2rem; }
 .avatar-wrapper { display: inline-block; position: relative; flex: 0 0 auto; margin-bottom: 1.2rem; }
 .profile-identity .avatar-wrapper { margin: 0; }
@@ -175,8 +174,8 @@ body::before {
   .nav-links.active { right: 0; }
   .nav-toggle { z-index: 101; display: flex; }
   .hero-section { min-height: auto; padding: 6rem 1rem 2.5rem; text-align: left; }
-  .hero-content { width: min(100%, 800px); padding: 1.35rem; padding-top: 190px; }
-  .hero-content > .banner-container { height: 170px; }
+  .hero-content { width: min(100%, 800px); padding: 0 1.35rem 1.35rem; }
+  .hero-content > .banner-container { width: calc(100% + 2.7rem); height: 170px; margin: 0 -1.35rem 1.4rem; }
   .profile-identity { justify-content: flex-start; gap: .9rem; }
   .hero-avatar { width: 82px; height: 82px; }
   .profile-name-group { flex: 1; }
@@ -201,7 +200,8 @@ body::before {
   .footer { padding: 2rem 1rem; }
 }
 @media (max-width: 380px) {
-  .hero-content { padding: 1rem; padding-top: 175px; }
+  .hero-content { padding: 0 1rem 1rem; }
+  .hero-content > .banner-container { width: calc(100% + 2rem); height: 145px; margin: 0 -1rem 1.2rem; }
   .profile-identity { gap: .65rem; }
   .hero-avatar { width: 68px; height: 68px; }
   .hero-actions { align-items: stretch; }
